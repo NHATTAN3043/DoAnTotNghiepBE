@@ -1,0 +1,65 @@
+# Tệp trợ giúp
+HELP.md
+
+# Maven & Maven Wrapper
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/libraries
+.idea/shelf/
+.idea/vcs.xml
+.idea/httpRequests/
+
+# Các file build (Maven/Gradle)
+target/
+out/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code
+.vscode/
+
+# Các file hệ thống của macOS và Windows
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# File log
+*.log
+logs/
+
+# Biến môi trường và các file cấu hình nhạy cảm
+.env
+*.env
+*.env.*
+
+# File build đầu ra .jar và .war
+*.jar
+*.war
+
+# Các thư mục của STS (Spring Tool Suite)
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+uploadImgDevice/
