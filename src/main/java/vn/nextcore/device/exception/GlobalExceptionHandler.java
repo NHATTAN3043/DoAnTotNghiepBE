@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     static {
         errorMap.put("ER001", "Email not blank");
         errorMap.put("ER002", "Password not blank");
-        errorMap.put("ER003", "Email has the suffix @nextcore.vn");
+//        errorMap.put("ER003", "Email has the suffix @nextcore.vn");
         errorMap.put("ER004", "The password length >= 8 and <= 50 characters.");
         errorMap.put("ER005", "Internal server error. Please try again later.");
         errorMap.put("ER006", "Email length <= 100 characters");

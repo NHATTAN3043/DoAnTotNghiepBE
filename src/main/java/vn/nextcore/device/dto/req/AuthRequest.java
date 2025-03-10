@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class AuthRequest {
     @NotBlank(message = "ER001")
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@nextcore\\.vn$", message = "ER003")
+//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n", message = "ER003")
     @Size(max = 100, message = "ER006")
     @Schema(example = "abc123@nextcore.vn")
     private String email;
