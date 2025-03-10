@@ -56,6 +56,7 @@ public class AuthService implements IAuthService {
                 User userExists = userRepository.findByEmail(authRequest.getEmail());
                 String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(userExists.getId()));
                 authResponse.setRefreshToken(refreshToken);
+                authResponse.setRoleId(userExists.getRole().getId());
             }
             authResponse.setExpireIn(jwtExpirationMs);
             return authResponse;
