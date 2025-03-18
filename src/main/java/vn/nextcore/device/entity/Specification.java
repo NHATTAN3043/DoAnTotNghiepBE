@@ -13,11 +13,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "specifications")
+@Table(name = "THONGSO")
 public class Specification {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String VALUE ="value";
+    public static final String ID = "maThongSo";
+    public static final String NAME = "tenThongSo";
+    public static final String VALUE ="giaTri";
     public static final String SPECIFICATIONS = "specifications";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

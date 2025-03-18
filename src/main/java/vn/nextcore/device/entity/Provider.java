@@ -13,12 +13,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "providers")
+@Table(name = "NHACUNGCAP")
 public class Provider {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String ADDRESS = "address";
-    public static final String PHONE_NUMBER = "phone_number";
+    public static final String ID = "maNhaCungCap";
+    public static final String NAME = "tenNhaCungCap";
+    public static final String ADDRESS = "diaChi";
+    public static final String PHONE_NUMBER = "soDienThoai";
     public static final String PROVIDER = "provider";
 
     @Id

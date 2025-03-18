@@ -12,12 +12,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "request_groups")
+@Table(name = "LOAITHIETBIYEUCAU")
 public class RequestGroup {
-    public static final String ID = "id";
-    public static final String QUANTITY = "quantity";
-    public static final String GROUP_ID = "group_id";
-    public static final String REQUEST_ID = "request_id";
+    public static final String ID = "maLTBYC";
+    public static final String QUANTITY = "soLuong";
+    public static final String GROUP_ID = "maLoaiThietBi";
+    public static final String REQUEST_ID = "maYeuCau";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

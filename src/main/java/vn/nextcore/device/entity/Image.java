@@ -11,12 +11,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "images")
+@Table(name = "HINHANH")
 public class Image {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String DEVICE_ID = "device_id";
-    public static final String PATH = "path";
+    public static final String ID = "maHinhAnh";
+    public static final String NAME = "tenHinhAnh";
+    public static final String DEVICE_ID = "maThietBi";
+    public static final String PATH = "duongDan";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

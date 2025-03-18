@@ -17,19 +17,20 @@ import java.util.ArrayList;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "requests")
+    @Table(name = "YEUCAU")
 public class Request {
-    public static final String ID = "id";
-    public static final String TITLE = "title";
-    public static final String DESCRIPTION = "description";
-    public static final String STATUS = "status";
-    public static final String CREATED_DATE = "created_date";
-    public static final String APPROVED_DATE = "approved_date";
-    public static final String CREATED_BY = "created_by";
-    public static final String USER_ASSIGNED = "user_assigned";
-    public static final String APPROVER = "approver";
-    public static final String PROJECT_ID = "project_id";
+    public static final String ID = "maYeuCau";
+    public static final String TITLE = "tieuDe";
+    public static final String DESCRIPTION = "moTa";
+    public static final String STATUS = "trangThai";
+    public static final String CREATED_DATE = "ngayTao";
+    public static final String APPROVED_DATE = "ngayDuyet";
+    public static final String CREATED_BY = "maNguoiTao";
+    public static final String USER_ASSIGNED = "nguoiDuocPhan";
+    public static final String APPROVER = "maNguoiDuyet";
+    public static final String PROJECT_ID = "maDuAn";
     public static final String REQUEST = "request";
+    public static final String USER_ID = "maNguoiDung";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,15 +54,15 @@ public class Request {
 
     // relationship of user
     @ManyToOne
-    @JoinColumn(name = CREATED_BY, referencedColumnName = ID, nullable = false)
+    @JoinColumn(name = CREATED_BY, referencedColumnName = USER_ID, nullable = false)
     private User createdBy;
 
     @ManyToOne
-    @JoinColumn(name = USER_ASSIGNED, referencedColumnName = ID, nullable = false)
+    @JoinColumn(name = USER_ASSIGNED, referencedColumnName = USER_ID, nullable = false)
     private User userAssigned;
 
     @ManyToOne
-    @JoinColumn(name = APPROVER, referencedColumnName = ID, nullable = false)
+    @JoinColumn(name = APPROVER, referencedColumnName = USER_ID, nullable = false)
     private User approver;
 
     // relationship of project

@@ -18,26 +18,26 @@ import java.util.ArrayList;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "devices")
+@Table(name = "THIETBI")
 public class Device {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String PRICE_BUY = "price_buy";
-    public static final String PRICE_SELL = "price_sell";
-    public static final String DESCRIPTION = "description";
-    public static final String STATUS = "status";
-    public static final String DATE_BUY = "date_buy";
-    public static final String DATE_SELL = "date_sell";
-    public static final String DATE_MAINTENANCE = "date_maintenance";
+    public static final String ID = "maThietBi";
+    public static final String NAME = "tenThietBi";
+    public static final String PRICE_BUY = "giaMua";
+    public static final String PRICE_SELL = "giaBan";
+    public static final String DESCRIPTION = "moTa";
+    public static final String STATUS = "trangThai";
+    public static final String DATE_BUY = "ngayMua";
+    public static final String DATE_SELL = "ngayBan";
+    public static final String DATE_MAINTENANCE = "thoiHanBaoTri";
     public static final String UPDATED_AT = "updated_at";
     public static final String CREATED_AT = "created_at";
     public static final String DELETED_AT = "deleted_at";
-    public static final String GROUP_ID = "group_id";
-    public static final String CREATED_BY = "create_by";
-    public static final String PROVIDER_ID = "provider_id";
-    public static final String DEVICE_SPECIFICATIONS = "device_specifications";
-    public static final String DEVICE_ID = "device_id";
-    public static final String SPECIFICATION_ID = "specification_id";
+    public static final String GROUP_ID = "maLoai";
+    public static final String CREATED_BY = "maNguoiTao";
+    public static final String PROVIDER_ID = "maNhaCungCap";
+    public static final String DEVICE_SPECIFICATIONS = "THIETBI_THONGSO";
+    public static final String DEVICE_ID = "maThietBi";
+    public static final String SPECIFICATION_ID = "maThongSo";
     public static final String DEVICE = "device";
 
     @Id
