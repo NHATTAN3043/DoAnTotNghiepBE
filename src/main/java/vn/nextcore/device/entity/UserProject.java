@@ -12,12 +12,12 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users_projects")
+@Table(name = "NGUOIDUNG_DUAN")
 public class UserProject {
-    public static final String ID = "id";
-    public static final String DATE_OF_JOIN = "date_of_join";
-    public static final String USER_ID = "user_id";
-    public static final String PROJECT_ID = "project_id";
+    public static final String ID = "maNDDA";
+    public static final String DATE_OF_JOIN = "ngayThamGia";
+    public static final String USER_ID = "maNguoiDung";
+    public static final String PROJECT_ID = "maDuAn";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -18,19 +18,19 @@ import java.util.HashSet;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "NGUOIDUNG")
 public class User {
-    public static final String ID = "id";
-    public static final String NAME = "name";
+    public static final String ID = "maNguoiDung";
+    public static final String NAME = "ten";
     public static final String EMAIL = "email";
-    public static final String PHONE_NUMBER = "phone_number";
-    public static final String GENDER = "gender";
-    public static final String DATE_OF_BIRTH = "date_of_birth";
-    public static final String ADDRESS = "address";
-    public static final String AVATAR_URL = "avatar_url";
-    public static final String INFO_CV = "info_cv";
-    public static final String PASSWORD = "password";
-    public static final String ROLE_ID = "role_id";
+    public static final String PHONE_NUMBER = "soDienThoai";
+    public static final String GENDER = "gioiTinh";
+    public static final String DATE_OF_BIRTH = "ngaySinh";
+    public static final String ADDRESS = "diaChi";
+    public static final String AVATAR_URL = "anhDaiDien";
+    public static final String PASSWORD = "matKhau";
+    public static final String ROLE_ID = "maChucVu";
+    public static final String DEPARTMENT_ID = "maPhongBan";
     public static final String USER = "user";
     public static final String CREATED_BY = "createdBy";
     public static final String USER_ASSIGNED = "userAssigned";
@@ -62,9 +62,6 @@ public class User {
     @Column(name = AVATAR_URL, length = 500)
     private String avatarUrl;
 
-    @Column(name = INFO_CV, length = 500)
-    private String infoCVUrl;
-
     @Column(name = PASSWORD)
     @Size(min = 6, max = 500)
     private String password;
@@ -72,6 +69,10 @@ public class User {
     @ManyToOne
     @JoinColumn(name = ROLE_ID)
     private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = DEPARTMENT_ID)
+    private Department department;
 
     // relationship of user projects
     @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)

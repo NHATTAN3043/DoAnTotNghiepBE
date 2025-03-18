@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,11 +14,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "CHUCVU")
-public class Role {
-    public static final String ID = "maChucVu";
-    public static final String NAME = "tenChucVu";
-    public static final String ROLE = "role";
+@Table(name = "PHONGBAN")
+public class Department {
+    public static final String ID = "maPhongBan";
+    public static final String NAME = "tenPhongBan";
+    public static final String DEPARTMENT = "department";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = ID, nullable = false)
@@ -26,6 +27,6 @@ public class Role {
     @Column(name = NAME, length = 100)
     private String name;
 
-    @OneToMany(mappedBy = ROLE, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = DEPARTMENT, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
 }
