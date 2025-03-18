@@ -16,7 +16,7 @@ public class HandlerValidateParams {
     private static final String REGEX_STATUS = "^(stock|active|maintenance)$";
     private static final String REGEX_DATE_FORMAT = "^\\d{2}/\\d{2}/\\d{4}$";
     private static final String REGEX_OTP = "^\\d{6}$";
-    private static final String REGEX_EMAIL = "^[A-Za-z0-9._%+-]+@nextcore\\.vn$";
+    private static final String REGEX_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 

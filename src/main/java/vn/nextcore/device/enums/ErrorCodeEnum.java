@@ -4,7 +4,7 @@ public enum ErrorCodeEnum {
     ER007("ER007", "Wrong email or password"),
     ER001("ER001", "Email not blank"),
     ER002("ER002", "Password not blank"),
-    ER003("ER003", "Email has the suffix @nextcore.vn"),
+    ER003("ER003", "Email format invalid"),
     ER004("ER004", "The password length >= 8 and <= 50 characters."),
     ER005("ER005", "Internal server error. Please try again later."),
     ER025("ER025", "createBy not exists"),

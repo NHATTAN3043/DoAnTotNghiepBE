@@ -2,6 +2,7 @@ package vn.nextcore.device.service.forgotPassword;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ public class ForgotPasswordService implements IForgotPasswordService{
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Value("${bezkoder.app.jwtExpirationMs}")
+    private Long jwtExpirationMs;
+
     private int temporaryTokenExp = 300000;
 
     @Override
@@ -54,7 +58,7 @@ public class ForgotPasswordService implements IForgotPasswordService{
 
             User user = userRepository.findByEmail(email);
             if (user == null) {
-                throw new HandlerException(ErrorCodeEnum.ER108.getCode(), ErrorCodeEnum.ER108.getMessage(), HttpStatus.NOT_FOUND);
+                throw new HandlerException(ErrorCodeEnum.ER108.getCode(), ErrorCodeEnum.ER108.getMessage(), HttpStatus.BAD_REQUEST);
             }
             Integer otp = otpGenerator();
             MailBody mailBody = MailBody.builder()
@@ -116,6 +120,7 @@ public class ForgotPasswordService implements IForgotPasswordService{
             String temporaryToken = jwtUtil.generateAccessToken(userExists.getEmail(), temporaryTokenExp);
             result.setAccessToken(temporaryToken);
             result.setMessage(message);
+            result.setExpireIn(jwtExpirationMs);
 
             return result;
         } catch (HandlerException handlerException) {
