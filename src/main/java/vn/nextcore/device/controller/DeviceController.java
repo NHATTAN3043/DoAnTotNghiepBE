@@ -76,7 +76,6 @@ public class DeviceController {
     public DataResponse<ListDeviceResponse> listDevices(
             @AllowedParams(allowed = {"status", "ordDateBuy", "ordDateMaintenance", "offset", "limit", "filters"})
             @RequestParam Map<String, String> allParams) {
-
         ListDeviceResponse result = deviceService.getAllDevices(allParams);
         return new DataResponse<>(result);
     }

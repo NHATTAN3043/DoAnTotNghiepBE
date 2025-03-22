@@ -6,10 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.nextcore.device.dto.req.ProviderRequest;
 import vn.nextcore.device.dto.resp.DataResponse;
 import vn.nextcore.device.dto.resp.ErrorResponse;
 import vn.nextcore.device.dto.resp.ProviderResponse;
@@ -32,8 +30,15 @@ public class ProviderController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public DataResponse<List<ProviderResponse>> getAllSpecifications() {
+    public DataResponse<List<ProviderResponse>> getAllProviders() {
         List<ProviderResponse> result = providerService.getAllProvider();
+        return new DataResponse<>(result);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    public DataResponse<ProviderResponse> createProvider(@RequestBody ProviderRequest req) {
+        ProviderResponse result = providerService.createProvider(req);
         return new DataResponse<>(result);
     }
 }

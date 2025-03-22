@@ -64,6 +64,12 @@ public class GlobalExceptionHandler {
         errorMap.put("ER058", "deviceId must be positive integer");
         errorMap.put("ER113", "repeatPassword not blank");
         errorMap.put("ER114", "password length must be > = 8 and <= 50 char");
+        errorMap.put("ER115", "Name provider not blank");
+        errorMap.put("ER116", "Phone provider not blank");
+        errorMap.put("ER117", "Phone provider invalid");
+        errorMap.put("ER118", "Address provider not blank");
+        errorMap.put("ER119", "name provider max length 250");
+        errorMap.put("ER120", "address provider max length 250");
     }
 
     @ExceptionHandler(HandlerException.class)

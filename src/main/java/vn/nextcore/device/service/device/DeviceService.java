@@ -133,7 +133,7 @@ public class DeviceService implements IDeviceService {
 
             // Decode and validate filters
             List<FilterRequest> filters = validateFilters(allParams);
-
+            System.out.println(filters);
             // Query devices
             ListDeviceResponse result = deviceCriteriaRepository.listDeviceCriteria(
                     status, ordDateBuy, ordDateMaintenance, Integer.valueOf(offset), Integer.valueOf(limit), filters
