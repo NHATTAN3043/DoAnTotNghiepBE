@@ -34,7 +34,7 @@ public class SpecificationService implements ISpecificationService {
         }
 
         if (result.isEmpty())
-            throw new HandlerException(ErrorCodeEnum.ER036.getCode(), ErrorCodeEnum.ER036.getMessage(), PathEnum.SPECIFICATION_PATH.getPath(), HttpStatus.NOT_FOUND);
+            throw new HandlerException(ErrorCodeEnum.ER036.getCode(), ErrorCodeEnum.ER036.getMessage(), PathEnum.SPECIFICATION_PATH.getPath(), HttpStatus.NO_CONTENT);
 
         return result;
     }

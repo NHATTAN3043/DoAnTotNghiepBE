@@ -40,7 +40,7 @@ public class JsonUtils {
 
             return new ArrayList<>(filterRequests);
         } catch (Exception e) {
-            throw new HandlerException(ErrorCodeEnum.ER043.getCode(), ErrorCodeEnum.ER043.getMessage(), HttpStatus.NOT_FOUND);
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

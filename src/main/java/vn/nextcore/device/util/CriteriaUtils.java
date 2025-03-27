@@ -1,6 +1,7 @@
 package vn.nextcore.device.util;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,10 @@ public class CriteriaUtils {
     public static Predicate createQueryByOperator(CriteriaBuilder cb, Root<?> root, String field, Operator operator, List<String> values, SimpleDateFormat dateFormat) throws ParseException, HandlerException {
         switch (operator) {
             case LIKE:
-                return cb.like(cb.lower(root.get(field)), "%" + values.get(0).toLowerCase() + "%");
+                Expression<String> unaccentedField = cb.function("unaccent", String.class, cb.lower(root.get(field)));
+                Expression<String> unaccentedValue = cb.function("unaccent", String.class, cb.literal("%" + values.get(0).toLowerCase() + "%"));
+                return cb.like(unaccentedField, unaccentedValue);
+//                return cb.like(cb.lower(root.get(field)), "%" + values.get(0).toLowerCase() + "%");
             case EQ:
                 return cb.equal(root.get(field), ParseUtils.parseValue(field, values.get(0), dateFormat));
             case GTE:

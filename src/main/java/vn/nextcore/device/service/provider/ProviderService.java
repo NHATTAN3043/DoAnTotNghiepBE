@@ -3,6 +3,7 @@ package vn.nextcore.device.service.provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import vn.nextcore.device.dto.req.ProviderRequest;
 import vn.nextcore.device.dto.resp.ProviderResponse;
 import vn.nextcore.device.entity.Provider;
 import vn.nextcore.device.enums.ErrorCodeEnum;
@@ -41,5 +42,22 @@ public class ProviderService implements IProviderService {
             throw new HandlerException(ErrorCodeEnum.ER045.getCode(), ErrorCodeEnum.ER045.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.NOT_FOUND);
 
         return results;
+    }
+
+    @Override
+    public ProviderResponse createProvider(ProviderRequest req) {
+        try {
+            Provider provider = new Provider();
+            provider.setName(req.getName());
+            provider.setAddress(req.getAddress());
+            provider.setPhoneNumber(req.getPhoneNumber());
+            providerRepository.save(provider);
+            ProviderResponse result = new ProviderResponse();
+            result.setId(provider.getId().toString());
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

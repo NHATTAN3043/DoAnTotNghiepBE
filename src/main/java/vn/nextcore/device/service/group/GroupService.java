@@ -1,5 +1,6 @@
 package vn.nextcore.device.service.group;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import vn.nextcore.device.dto.req.GroupRequest;
 import vn.nextcore.device.dto.resp.GroupResponse;
@@ -88,7 +89,7 @@ public class GroupService implements IGroupService {
     public List<GroupResponse> getAllGroup() {
         List<GroupResponse> results = new ArrayList<>();
         try {
-            List<Group> groupList = groupRepository.findAll();
+            List<Group> groupList = groupRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
             for (Group group : groupList) {
                 GroupResponse item = new GroupResponse();
                 item.setId(String.valueOf(group.getId()));
