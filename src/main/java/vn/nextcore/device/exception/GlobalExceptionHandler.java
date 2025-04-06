@@ -70,6 +70,12 @@ public class GlobalExceptionHandler {
         errorMap.put("ER118", "Address provider not blank");
         errorMap.put("ER119", "name provider max length 250");
         errorMap.put("ER120", "address provider max length 250");
+        errorMap.put("ER121", "Title not blank");
+        errorMap.put("ER122", "Description not blank");
+        errorMap.put("ER123", "projectId not blank");
+        errorMap.put("ER124", "requestDevices not blank");
+        errorMap.put("ER125", "groupId invalid");
+        errorMap.put("ER126", "quantity invalid");
     }
 
     @ExceptionHandler(HandlerException.class)

@@ -58,6 +58,8 @@ public enum ErrorCodeEnum {
     ER112("ER112", "password not mapping with repeatPassword"),
     ER113("ER113", "repeatPassword not blank"),
     ER114("ER114", "password length must be > = 8 char"),
+    ER123("ER123", "projectId not blank"),
+    ER125("ER125", "groupId invalid"),
     ER404("ER404", "Not found");
 
     private final String code;

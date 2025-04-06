@@ -39,7 +39,7 @@ public class ProviderService implements IProviderService {
         }
 
         if (results.isEmpty())
-            throw new HandlerException(ErrorCodeEnum.ER045.getCode(), ErrorCodeEnum.ER045.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.NOT_FOUND);
+            throw new HandlerException(ErrorCodeEnum.ER045.getCode(), ErrorCodeEnum.ER045.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.BAD_REQUEST);
 
         return results;
     }

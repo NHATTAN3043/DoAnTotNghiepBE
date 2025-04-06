@@ -104,7 +104,7 @@ public class GroupService implements IGroupService {
         }
 
         if (results.isEmpty())
-            throw new HandlerException(ErrorCodeEnum.ER044.getCode(), ErrorCodeEnum.ER044.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.NOT_FOUND);
+            throw new HandlerException(ErrorCodeEnum.ER044.getCode(), ErrorCodeEnum.ER044.getMessage(), PathEnum.GROUP_PATH.getPath(), HttpStatus.BAD_REQUEST);
 
         return results;
     }
