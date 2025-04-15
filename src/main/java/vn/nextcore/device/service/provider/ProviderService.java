@@ -26,7 +26,7 @@ public class ProviderService implements IProviderService {
             List<Provider> providerList = providerRepository.findAll();
             for (Provider provider : providerList) {
                 ProviderResponse item = new ProviderResponse();
-                item.setId(String.valueOf(provider.getId()));
+                item.setId(provider.getId());
                 item.setName(provider.getName());
                 item.setAddress(provider.getAddress());
                 item.setPhoneNumber(provider.getPhoneNumber());
@@ -53,7 +53,7 @@ public class ProviderService implements IProviderService {
             provider.setPhoneNumber(req.getPhoneNumber());
             providerRepository.save(provider);
             ProviderResponse result = new ProviderResponse();
-            result.setId(provider.getId().toString());
+            result.setId(provider.getId());
             return result;
         } catch (Exception e) {
             e.printStackTrace();

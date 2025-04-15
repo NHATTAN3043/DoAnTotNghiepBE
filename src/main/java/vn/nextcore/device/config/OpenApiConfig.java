@@ -106,4 +106,12 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/project/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi deliveryApi() {
+        return GroupedOpenApi.builder()
+                .group("api-delivery")
+                .pathsToMatch("/api/delivery/**")
+                .build();
+    }
 }

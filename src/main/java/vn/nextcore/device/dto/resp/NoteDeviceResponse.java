@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
-@Schema
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProviderResponse {
-    private Long id;
+@Schema
+public class NoteDeviceResponse {
+    private Long noteDeviceId;
 
-    private String name;
+    private String descriptionDevice;
 
-    private String address;
+    private Double priceMaintenance;
 
-    private String phoneNumber;
+    private DeviceResponse device;
 }

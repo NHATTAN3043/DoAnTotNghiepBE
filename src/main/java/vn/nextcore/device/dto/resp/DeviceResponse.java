@@ -35,7 +35,7 @@ public class DeviceResponse {
 
     private List<ImageResponse> images = null;
 
-    private List<SpecificationResponse> specifications = null;
+    private List<SpecificationResponse> specifications;
 
     private String image;
 }

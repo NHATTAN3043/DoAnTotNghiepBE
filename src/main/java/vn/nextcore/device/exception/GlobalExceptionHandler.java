@@ -76,6 +76,14 @@ public class GlobalExceptionHandler {
         errorMap.put("ER124", "requestDevices not blank");
         errorMap.put("ER125", "groupId invalid");
         errorMap.put("ER126", "quantity invalid");
+        errorMap.put("ER127", "createdDate invalid");
+        errorMap.put("ER128", "approvedDate invalid");
+        errorMap.put("ER129", "status must in pending|approved|done");
+        errorMap.put("ER130", "Offset must >= 0");
+        errorMap.put("ER131", "Limit must >= 1");
+        errorMap.put("ER132", "sortCreatedDate must in desc|asc");
+        errorMap.put("ER133", "sortApprovedDate must in desc|asc");
+        errorMap.put("ER134", "type not exists");
     }
 
     @ExceptionHandler(HandlerException.class)

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 @AllArgsConstructor
@@ -27,6 +29,12 @@ public class ReqResponse {
     private String type;
 
     private UserResponse createdBy;
+
+    private UserResponse approveBy;
+
+    private List<ReqGroupResponse> groupRequest;
+
+    private List<DeliveryNoteResponse> deliveryNoteResponses;
 
     public ReqResponse(Long requestId) {
         this.requestId = requestId;

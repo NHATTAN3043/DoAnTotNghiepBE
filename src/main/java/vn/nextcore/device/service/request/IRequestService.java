@@ -2,6 +2,7 @@ package vn.nextcore.device.service.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
+import vn.nextcore.device.dto.req.ApproveRequest;
 import vn.nextcore.device.dto.req.DataRequest;
 import vn.nextcore.device.dto.resp.ListRequestResponse;
 import vn.nextcore.device.dto.resp.ReqResponse;
@@ -24,4 +25,9 @@ public interface IRequestService {
             String sortApprovedDate,
             Integer offset,
             Integer limit);
+
+    ReqResponse getReqDetail(String id);
+
+    ReqResponse approveRequest( HttpServletRequest request , ApproveRequest data);
+
 }

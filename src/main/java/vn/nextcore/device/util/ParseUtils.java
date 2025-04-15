@@ -2,9 +2,7 @@ package vn.nextcore.device.util;
 
 import org.springframework.http.HttpStatus;
 import vn.nextcore.device.dto.resp.*;
-import vn.nextcore.device.entity.Device;
-import vn.nextcore.device.entity.Image;
-import vn.nextcore.device.entity.Request;
+import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.exception.HandlerException;
 
@@ -17,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm - dd/MM/yyyy");
 
     public static DeviceResponse convertDeviceToDeviceRes(Device device, String method) {
         try {
@@ -45,7 +44,7 @@ public class ParseUtils {
                 deviceResponse.setGroup(groupResponse);
 
                 ProviderResponse providerResponse = new ProviderResponse();
-                providerResponse.setId(device.getProvider().getId() != null ? String.valueOf(device.getProvider().getId()) : null);
+                providerResponse.setId(device.getProvider().getId() != null ? device.getProvider().getId() : null);
                 providerResponse.setName(device.getProvider().getName());
                 deviceResponse.setProvider(providerResponse);
 
@@ -56,17 +55,15 @@ public class ParseUtils {
                     ).collect(Collectors.toList());
                 }
                 deviceResponse.setImages(images);
-
-                List<SpecificationResponse> specifications = new ArrayList<>();
-                if (device.getSpecifications() != null) {
-                    specifications = device.getSpecifications().stream().map(specification ->
-                            new SpecificationResponse(specification.getId(), specification.getName(), specification.getValue())
-                    ).collect(Collectors.toList());
-                }
-                deviceResponse.setSpecifications(specifications);
-
             }
 
+            List<SpecificationResponse> specifications = new ArrayList<>();
+            if (device.getSpecifications() != null) {
+                specifications = device.getSpecifications().stream().map(specification ->
+                        new SpecificationResponse(specification.getId(), specification.getName(), specification.getValue())
+                ).collect(Collectors.toList());
+            }
+            deviceResponse.setSpecifications(specifications);
             deviceResponse.setDateBuy(dateFormat.format(device.getDateBuy()));
             deviceResponse.setDateMaintenance(dateFormat.format(device.getDateMaintenance()));
             deviceResponse.setDescription(device.getDescription());
@@ -80,7 +77,7 @@ public class ParseUtils {
 
     }
 
-    public static ReqResponse convertRequestToReqResponse(Request request) {
+    public static ReqResponse convertRequestToReqResponse(Request request, String method) {
         try {
             ReqResponse reqResponse = new ReqResponse();
             reqResponse.setRequestId(request.getId());
@@ -88,22 +85,90 @@ public class ParseUtils {
             reqResponse.setDescriptions(request.getDescription());
             reqResponse.setType(request.getRequestType());
             reqResponse.setStatus(request.getStatus());
-            if (request.getCreatedDate() != null) reqResponse.setCreatedDate(dateFormat.format(request.getCreatedDate()));
-            if (request.getApprovedDate() != null) reqResponse.setApprovedDate(dateFormat.format(request.getApprovedDate()));
+            if (request.getCreatedDate() != null)
+                reqResponse.setCreatedDate(timeFormat.format(request.getCreatedDate()));
+            if (request.getApprovedDate() != null)
+                reqResponse.setApprovedDate(timeFormat.format(request.getApprovedDate()));
+
             UserResponse user = new UserResponse();
             user.setUserName(request.getCreatedBy().getUserName());
             user.setEmail(request.getCreatedBy().getEmail());
             user.setGender(request.getCreatedBy().getGender());
+            user.setPhoneNumber(request.getCreatedBy().getPhoneNumber());
             user.setId(request.getCreatedBy().getId());
             user.setAvatarUrl(request.getCreatedBy().getAvatarUrl());
             user.setRole(new RoleResponse(request.getCreatedBy().getRole().getId(), request.getCreatedBy().getRole().getName()));
             reqResponse.setCreatedBy(user);
+            if (request.getApprover() != null) {
+                UserResponse approver = new UserResponse();
+                approver.setUserName(request.getCreatedBy().getUserName());
+                approver.setEmail(request.getCreatedBy().getEmail());
+                approver.setGender(request.getCreatedBy().getGender());
+                approver.setId(request.getCreatedBy().getId());
+                approver.setAvatarUrl(request.getCreatedBy().getAvatarUrl());
+                approver.setRole(new RoleResponse(request.getCreatedBy().getRole().getId(), request.getCreatedBy().getRole().getName()));
+                reqResponse.setApproveBy(approver);
+            }
+
+            // convert extra details
+            if ("details".equals(method)) {
+                if (request.getRequestGroups() != null && !request.getRequestGroups().isEmpty()) {
+                    List<ReqGroupResponse> reqGroupResponses = new ArrayList<>();
+                    for (RequestGroup requestGroup : request.getRequestGroups()) {
+                        ReqGroupResponse reqGroupResponse = new ReqGroupResponse();
+                        reqGroupResponse.setReqGroupId(requestGroup.getId());
+                        reqGroupResponse.setGroupId(requestGroup.getGroup().getId());
+                        reqGroupResponse.setGroupName(requestGroup.getGroup().getName());
+                        reqGroupResponse.setReqQuantity(requestGroup.getQuantity());
+                        reqGroupResponse.setStatus(requestGroup.getStatus());
+                        reqGroupResponses.add(reqGroupResponse);
+                    }
+                    reqResponse.setGroupRequest(reqGroupResponses);
+                }
+
+                if (request.getDeliveryNotes() != null && !request.getDeliveryNotes().isEmpty()) {
+                    List<DeliveryNoteResponse> deliveryNotes = new ArrayList<>();
+                    for (DeliveryNote deliveryNote : request.getDeliveryNotes()) {
+                        DeliveryNoteResponse deliveryNoteResponse = new DeliveryNoteResponse();
+                        deliveryNoteResponse.setDeliveryNoteId(deliveryNote.getId());
+                        deliveryNoteResponse.setTypeAction(deliveryNote.getTypeNote());
+                        deliveryNoteResponse.setTimeCreated(timeFormat.format(deliveryNote.getDeliveryDate()));
+                        deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
+                        deliveryNoteResponse.setCreatedBy(new UserResponse(deliveryNote.getCreatedBy().getId(),
+                                deliveryNote.getCreatedBy().getUserName(), deliveryNote.getCreatedBy().getEmail(),
+                                deliveryNote.getCreatedBy().getAvatarUrl()));
+                        if (deliveryNote.getProvider() != null) {
+                            deliveryNoteResponse.setProvider(new ProviderResponse(deliveryNote.getProvider().getId(),
+                                    deliveryNote.getProvider().getName(), deliveryNote.getProvider().getAddress(),
+                                    deliveryNote.getProvider().getPhoneNumber()));
+                        }
+                        List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
+                        for (NoteDevice noteDevice : deliveryNote.getNoteDevices()) {
+                            NoteDeviceResponse noteDeviceResponse = new NoteDeviceResponse();
+                            noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
+                            noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
+                            noteDeviceResponse.setPriceMaintenance(noteDevice.getPriceDevice());
+
+                            DeviceResponse deviceResponse = new DeviceResponse();
+                            deviceResponse.setDeviceId(noteDevice.getDevice().getId());
+                            deviceResponse.setName(noteDevice.getDevice().getName());
+                            deviceResponse.setGroupName(noteDevice.getDevice().getGroup().getName());
+                            noteDeviceResponse.setDevice(deviceResponse);
+
+                            noteDeviceResponses.add(noteDeviceResponse);
+                        }
+                        deliveryNoteResponse.setNoteDeviceResponses(noteDeviceResponses);
+                        deliveryNotes.add(deliveryNoteResponse);
+                    }
+                    reqResponse.setDeliveryNoteResponses(deliveryNotes);
+                }
+            }
+
             return reqResponse;
         } catch (Exception e) {
             e.printStackTrace();
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     // parse string to date if field is date

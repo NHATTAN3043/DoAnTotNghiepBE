@@ -52,6 +52,10 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
             predicates.add(cb.like(unaccentedField, unaccentedValue));
             }
 
+            if (status != null) {
+                predicates.add(cb.equal(cb.lower(requestRoot.get("status")), status.toLowerCase()));
+            }
+
             if (createdDate != null) {
                 predicates.add(cb.equal(cb.function("date", Date.class, requestRoot.get("createdDate")), dateFormat.parse(createdDate)));
             }
@@ -100,7 +104,7 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
             List<ReqResponse> result = new ArrayList<>();
 
             for (Request request : requests) {
-                ReqResponse reqResponse = ParseUtils.convertRequestToReqResponse(request);
+                ReqResponse reqResponse = ParseUtils.convertRequestToReqResponse(request, null);
                 result.add(reqResponse);
             }
 
