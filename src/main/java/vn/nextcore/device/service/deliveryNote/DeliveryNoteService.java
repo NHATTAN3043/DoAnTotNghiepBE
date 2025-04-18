@@ -72,8 +72,17 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                 noteDevice.setDescriptionDevice(note.getDescriptionDevice());
                 Device device = deviceRepository.findDeviceById(note.getDeviceId());
 
-                // change status device
-                device.setStatus("active");
+                if ("allocate".equals(request.getTypeNote())) {
+                    device.setUsingBy(requestExists.getCreatedBy());
+                    // change status device
+                    device.setStatus("active");
+                }
+
+                if ("retrieve".equals(request.getTypeNote())) {
+                    device.setUsingBy(null);
+                    // change status device
+                    device.setStatus("stock");
+                }
 
                 noteDevice.setDevice(device);
                 noteDevice.setDeliveryNote(deliveryNote);

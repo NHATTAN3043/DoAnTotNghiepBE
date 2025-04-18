@@ -74,7 +74,7 @@ public class DeviceService implements IDeviceService {
     @Value("${file.types}")
     private String[] VALID_IMAGE_TYPES;
 
-    private List<String> allowedFields = Arrays.asList("name", "groupId", "providerId", "dateBuy", "dateMaintenance");
+    private List<String> allowedFields = Arrays.asList("name", "groupId", "providerId", "dateBuy", "dateMaintenance", "usingBy");
 
     private final String STATUS_STOCK = "stock";
 
@@ -405,7 +405,7 @@ public class DeviceService implements IDeviceService {
 
     // validate value in filters
     private void validateFilterValues(FilterRequest filter) {
-        if (filter.getValues().size() > 2 || filter.getValues().isEmpty()) {
+        if ((filter.getValues().size() > 2 && !"groupId".equals(filter.getField())) || filter.getValues().isEmpty()) {
             throw new HandlerException(ErrorCodeEnum.ER053.getCode(), ErrorCodeEnum.ER053.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
