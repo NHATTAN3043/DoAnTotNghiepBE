@@ -6,4 +6,6 @@ import vn.nextcore.device.dto.resp.DeliveryNoteResponse;
 
 public interface IDeliveryNoteService {
     DeliveryNoteResponse createDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request);
+
+    DeliveryNoteResponse confirmDeliveryNote(HttpServletRequest request, DeliveryNoteRequest data);
 }

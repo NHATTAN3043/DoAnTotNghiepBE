@@ -18,6 +18,8 @@ public class DeliveryNoteResponse {
 
     private String typeAction;
 
+    private String description;
+
     private String timeCreated;
 
     private Boolean isConfirm;

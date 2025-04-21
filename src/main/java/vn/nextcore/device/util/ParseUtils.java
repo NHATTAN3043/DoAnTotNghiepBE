@@ -11,9 +11,7 @@ import vn.nextcore.device.repository.DeliveryNoteRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -130,15 +128,27 @@ public class ParseUtils {
 
                 if (request.getDeliveryNotes() != null && !request.getDeliveryNotes().isEmpty()) {
                     List<DeliveryNoteResponse> deliveryNotes = new ArrayList<>();
-                    for (DeliveryNote deliveryNote : request.getDeliveryNotes()) {
+                    // sort by deliveryDate asc
+                    List<DeliveryNote> sortedDeliveryNotes = request.getDeliveryNotes()
+                            .stream()
+                            .sorted(Comparator.comparing(DeliveryNote::getDeliveryDate))
+                            .collect(Collectors.toList());
+
+                    for (DeliveryNote deliveryNote : sortedDeliveryNotes) {
                         DeliveryNoteResponse deliveryNoteResponse = new DeliveryNoteResponse();
                         deliveryNoteResponse.setDeliveryNoteId(deliveryNote.getId());
                         deliveryNoteResponse.setTypeAction(deliveryNote.getTypeNote());
                         deliveryNoteResponse.setTimeCreated(timeFormat.format(deliveryNote.getDeliveryDate()));
                         deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
-                        deliveryNoteResponse.setCreatedBy(new UserResponse(deliveryNote.getCreatedBy().getId(),
-                                deliveryNote.getCreatedBy().getUserName(), deliveryNote.getCreatedBy().getEmail(),
-                                deliveryNote.getCreatedBy().getAvatarUrl()));
+                        deliveryNoteResponse.setDescription(deliveryNote.getDescription());
+                        UserResponse createdBy = new UserResponse();
+                        createdBy.setId(deliveryNote.getCreatedBy().getId());
+                        createdBy.setUserName(deliveryNote.getCreatedBy().getUserName());
+                        createdBy.setEmail(deliveryNote.getCreatedBy().getEmail());
+                        createdBy.setAvatarUrl(deliveryNote.getCreatedBy().getAvatarUrl());
+                        createdBy.setRole(new RoleResponse(deliveryNote.getCreatedBy().getRole().getId(), deliveryNote.getCreatedBy().getRole().getName()));
+                        deliveryNoteResponse.setCreatedBy(createdBy);
+
                         if (deliveryNote.getProvider() != null) {
                             deliveryNoteResponse.setProvider(new ProviderResponse(deliveryNote.getProvider().getId(),
                                     deliveryNote.getProvider().getName(), deliveryNote.getProvider().getAddress(),
@@ -155,6 +165,19 @@ public class ParseUtils {
                             deviceResponse.setDeviceId(noteDevice.getDevice().getId());
                             deviceResponse.setName(noteDevice.getDevice().getName());
                             deviceResponse.setGroupName(noteDevice.getDevice().getGroup().getName());
+                            Set<Image> images = noteDevice.getDevice().getImages();
+                            if (images != null && !images.isEmpty()) {
+                                Image firstImage = images.iterator().next();
+                                deviceResponse.setImage(firstImage.getName());
+                            }
+                            deviceResponse.setStatus(noteDevice.getDevice().getStatus());
+                            List<SpecificationResponse> specifications = new ArrayList<>();
+                            if (noteDevice.getDevice().getSpecifications() != null) {
+                                specifications = noteDevice.getDevice().getSpecifications().stream().map(specification ->
+                                        new SpecificationResponse(specification.getId(), specification.getName(), specification.getValue())
+                                ).collect(Collectors.toList());
+                            }
+                            deviceResponse.setSpecifications(specifications);
                             noteDeviceResponse.setDevice(deviceResponse);
 
                             noteDeviceResponses.add(noteDeviceResponse);

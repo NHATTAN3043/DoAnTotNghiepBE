@@ -6,6 +6,8 @@ import java.util.List;
 
 @Data
 public class DeliveryNoteRequest {
+    private Long id;
+
     private String typeNote;
 
     private String description;
@@ -13,6 +15,8 @@ public class DeliveryNoteRequest {
     private Long requestId;
 
     private Long providerId;
+
+    private Boolean isConfirm;
 
     private List<NoteDeviceRequest> noteDeviceRequests;
 

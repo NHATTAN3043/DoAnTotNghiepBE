@@ -11,6 +11,7 @@ import vn.nextcore.device.dto.resp.DeliveryNoteResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
+import vn.nextcore.device.enums.StatusRequest;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.DeliveryNoteRepository;
 import vn.nextcore.device.repository.DeviceRepository;
@@ -49,12 +50,13 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setCreatedAt(new Date());
             deliveryNote.setTypeNote(request.getTypeNote());
             deliveryNote.setDescription(request.getDescription());
-            deliveryNote.setIsConfirm(false);
+            deliveryNote.setIsConfirm(null);
 
             Request requestExists = requestRepository.findRequestById(request.getRequestId());
             if (requestExists == null) {
                 throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
+            requestExists.setStatus(StatusRequest.REQUEST_PROGRESS.getStatus());
             deliveryNote.setRequest(requestExists);
 
             // add createBy
@@ -96,6 +98,29 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setNoteDevices(noteDevices);
             deliveryNoteRepository.save(deliveryNote);
 
+            return new DeliveryNoteResponse(deliveryNote.getId());
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DELIVERY_PATH.getPath(), handlerException.getStatus());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public DeliveryNoteResponse confirmDeliveryNote(HttpServletRequest request, DeliveryNoteRequest data) {
+        try {
+            User user = jwtUtil.extraUserFromRequest(request);
+            DeliveryNote deliveryNote = deliveryNoteRepository.findDeliveryNoteById(data.getId());
+            if (deliveryNote == null) {
+                throw new HandlerException(ErrorCodeEnum.ER102.getCode(), ErrorCodeEnum.ER102.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.UNAUTHORIZED);
+            }
+
+            if (user.getId() != deliveryNote.getRequest().getCreatedBy().getId()) {
+                throw new HandlerException(ErrorCodeEnum.ER136.getCode(), ErrorCodeEnum.ER136.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+
+            deliveryNote.setIsConfirm(data.getIsConfirm());
+            deliveryNoteRepository.save(deliveryNote);
             return new DeliveryNoteResponse(deliveryNote.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DELIVERY_PATH.getPath(), handlerException.getStatus());

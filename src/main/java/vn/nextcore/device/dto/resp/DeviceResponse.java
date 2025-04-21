@@ -17,6 +17,8 @@ public class DeviceResponse {
 
     private String priceSell;
 
+    private String status;
+
     private String description;
 
     private String groupName;

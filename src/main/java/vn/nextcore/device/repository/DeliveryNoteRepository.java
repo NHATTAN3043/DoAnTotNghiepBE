@@ -6,4 +6,6 @@ import vn.nextcore.device.entity.DeliveryNote;
 
 @Repository
 public interface DeliveryNoteRepository extends JpaRepository<DeliveryNote, Long> {
+    DeliveryNote findDeliveryNoteById(Long id);
+
 }
