@@ -29,4 +29,11 @@ public class UserResponse {
     private String avatarUrl;
 
     private RoleResponse role;
+
+    public UserResponse(Long id, String userName, String email, String avatarUrl) {
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
+        this.avatarUrl = avatarUrl;
+    }
 }

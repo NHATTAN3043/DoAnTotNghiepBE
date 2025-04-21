@@ -33,6 +33,7 @@ public class User {
     public static final String DEPARTMENT_ID = "maPhongBan";
     public static final String USER = "user";
     public static final String CREATED_BY = "createdBy";
+    public static final String USING_BY = "usingBy";
     public static final String USER_ASSIGNED = "userAssigned";
     public static final String APPROVER = "approver";
 
@@ -81,6 +82,9 @@ public class User {
     // relationship of device
     @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Device> devices = new ArrayList<>();
+
+    @OneToMany(mappedBy = USING_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Device> devicesUsing = new ArrayList<>();
 
     // relationship of request
     @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -10,6 +10,8 @@ import java.util.Date;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
+
+    Device findDeviceById(Long id);
     Device findDeviceByIdAndDeletedAtIsNull(Long id);
 
     @Query("SELECT COUNT(s) > 0 FROM Device d JOIN d.specifications s " +

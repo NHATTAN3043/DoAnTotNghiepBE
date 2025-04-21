@@ -17,6 +17,8 @@ public class DeviceResponse {
 
     private String priceSell;
 
+    private String status;
+
     private String description;
 
     private String groupName;
@@ -35,7 +37,7 @@ public class DeviceResponse {
 
     private List<ImageResponse> images = null;
 
-    private List<SpecificationResponse> specifications = null;
+    private List<SpecificationResponse> specifications;
 
     private String image;
 }

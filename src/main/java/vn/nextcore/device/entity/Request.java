@@ -31,6 +31,7 @@ public class Request {
     public static final String PROJECT_ID = "maDuAn";
     public static final String REQUEST = "request";
     public static final String USER_ID = "maNguoiDung";
+    public static final String REQUEST_TYPE = "loaiYeuCau";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +47,9 @@ public class Request {
     @Column(name = STATUS, nullable = false, length = 50)
     private String status;
 
+    @Column(name = REQUEST_TYPE, nullable = false, length = 50)
+    private String requestType;
+
     @Column(name = CREATED_DATE)
     private Date createdDate;
 
@@ -58,11 +62,11 @@ public class Request {
     private User createdBy;
 
     @ManyToOne
-    @JoinColumn(name = USER_ASSIGNED, referencedColumnName = USER_ID, nullable = false)
+    @JoinColumn(name = USER_ASSIGNED, referencedColumnName = USER_ID, nullable = true)
     private User userAssigned;
 
     @ManyToOne
-    @JoinColumn(name = APPROVER, referencedColumnName = USER_ID, nullable = false)
+    @JoinColumn(name = APPROVER, referencedColumnName = USER_ID, nullable = true)
     private User approver;
 
     // relationship of project

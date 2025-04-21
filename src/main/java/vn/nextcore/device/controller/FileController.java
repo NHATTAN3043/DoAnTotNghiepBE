@@ -30,7 +30,7 @@ public class FileController {
         File file = new File(currentDirectory + UPLOAD_DIR + filename);
 
         if (!file.exists()) {
-            throw new HandlerException(ErrorCodeEnum.ER106.getCode(), ErrorCodeEnum.ER106.getMessage(), "/images", HttpStatus.NOT_FOUND);
+            throw new HandlerException(ErrorCodeEnum.ER106.getCode(), ErrorCodeEnum.ER106.getMessage(), "/images", HttpStatus.BAD_REQUEST);
         }
 
         try (InputStream inputStream = new FileInputStream(file)) {

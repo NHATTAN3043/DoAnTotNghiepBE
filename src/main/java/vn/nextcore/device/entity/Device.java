@@ -34,6 +34,7 @@ public class Device {
     public static final String DELETED_AT = "deleted_at";
     public static final String GROUP_ID = "maLoai";
     public static final String CREATED_BY = "maNguoiTao";
+    public static final String USING_BY = "maNguoiDung";
     public static final String PROVIDER_ID = "maNhaCungCap";
     public static final String DEVICE_SPECIFICATIONS = "THIETBI_THONGSO";
     public static final String DEVICE_ID = "maThietBi";
@@ -87,6 +88,10 @@ public class Device {
     @ManyToOne
     @JoinColumn(name = CREATED_BY)
     private User createdBy;
+
+    @ManyToOne
+    @JoinColumn(name = USING_BY)
+    private User usingBy;
 
     @ManyToOne
     @JoinColumn(name = PROVIDER_ID)

@@ -90,4 +90,28 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/forgotPassword/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi requestApi() {
+        return GroupedOpenApi.builder()
+                .group("api-request")
+                .pathsToMatch("/api/request/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi projectApi() {
+        return GroupedOpenApi.builder()
+                .group("api-project")
+                .pathsToMatch("/api/project/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi deliveryApi() {
+        return GroupedOpenApi.builder()
+                .group("api-delivery")
+                .pathsToMatch("/api/delivery/**")
+                .build();
+    }
 }

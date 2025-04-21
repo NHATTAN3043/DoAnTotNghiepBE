@@ -2,21 +2,13 @@ package vn.nextcore.device.dto.resp;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 @Schema
-@AllArgsConstructor
-@NoArgsConstructor
-public class ProviderResponse {
-    private Long id;
+public class ProjectResponse {
+    private String id;
 
     private String name;
-
-    private String address;
-
-    private String phoneNumber;
 }

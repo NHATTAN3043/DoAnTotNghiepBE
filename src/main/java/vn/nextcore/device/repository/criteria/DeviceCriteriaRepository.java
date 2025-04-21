@@ -9,10 +9,7 @@ import org.springframework.stereotype.Repository;
 import vn.nextcore.device.dto.req.FilterRequest;
 import vn.nextcore.device.dto.resp.DeviceResponse;
 import vn.nextcore.device.dto.resp.ListDeviceResponse;
-import vn.nextcore.device.entity.Device;
-import vn.nextcore.device.entity.Group;
-import vn.nextcore.device.entity.Image;
-import vn.nextcore.device.entity.Provider;
+import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.Operator;
 import vn.nextcore.device.enums.PathEnum;
@@ -25,12 +22,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class DeviceCriteriaRepository implements IDeviceCriteriaRepository {
     private final String PROVIDER = "provider";
     private final String GROUP = "group";
     private final String IMAGES = "images";
+    private final String SPECIFICATIONS = "specifications";
     private final String STATUS = "status";
     private final String ID = "id";
     private final String DATE_BUY = "dateBuy";
@@ -39,7 +38,9 @@ public class DeviceCriteriaRepository implements IDeviceCriteriaRepository {
     private final String DESC = "DESC";
     private final String PROVIDER_ID = "providerId";
     private final String GROUP_ID = "groupId";
+    private final String USING_BY = "usingBy";
     private final String DELETED_AT = "deletedAt";
+    private final String NAME = "name";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -58,6 +59,9 @@ public class DeviceCriteriaRepository implements IDeviceCriteriaRepository {
             Join<Device, Provider> providerJoin = deviceRoot.join(PROVIDER, JoinType.LEFT);
             Join<Device, Group> groupJoin = deviceRoot.join(GROUP, JoinType.LEFT);
             Join<Device, Image> imageJoin = deviceRoot.join(IMAGES, JoinType.LEFT);
+            Join<Device, Specification> specificationJoin = deviceRoot.join(SPECIFICATIONS, JoinType.LEFT);
+            Join<Device, User> usingByJoin = deviceRoot.join(USING_BY, JoinType.LEFT);
+
 
             List<Predicate> predicates = new ArrayList<>();
             // get device with deletedAt is null
@@ -70,7 +74,7 @@ public class DeviceCriteriaRepository implements IDeviceCriteriaRepository {
             // handle search by filters
             for (FilterRequest filter : filters) {
                 if (filter.getValues().size() >= 1 && CheckerUtils.checkIsNotEmptyValues(filter.getValues())) {
-                    Predicate predicate = handleFilterRequest(cb, deviceRoot, groupJoin, providerJoin, filter, dateFormat);
+                    Predicate predicate = handleFilterRequest(cb, deviceRoot, groupJoin, providerJoin, specificationJoin, usingByJoin, filter, dateFormat);
                     if (predicate != null) {
                         predicates.add(predicate);
                     }
@@ -139,17 +143,50 @@ public class DeviceCriteriaRepository implements IDeviceCriteriaRepository {
     }
 
     private Predicate handleFilterRequest(CriteriaBuilder cb, Root<Device> root, Join<Device, ?> groupJoin,
-                                          Join<Device, ?> providerJoin, FilterRequest filter, SimpleDateFormat dateFormat) throws ParseException, HandlerException {
+                                          Join<Device, ?> providerJoin, Join<Device, ?> specificationJoin, Join<Device, ?> usingByJoin, FilterRequest filter, SimpleDateFormat dateFormat) throws ParseException, HandlerException {
         Operator operator = Operator.fromString(filter.getOperator());
         String field = filter.getField();
         List<String> values = filter.getValues();
 
         if (GROUP_ID.equals(field)) {
-            return operator == Operator.EQ ? cb.equal(groupJoin.get(ID), values.get(0)) : null;
+            List<Predicate> groupPredicates = values.stream()
+                    .map(val -> cb.equal(groupJoin.get(ID), val))
+                    .collect(Collectors.toList());
+
+            return cb.or(groupPredicates.toArray(new Predicate[0]));
+        }
+
+        if (USING_BY.equals(field)) {
+            return operator == Operator.EQ ?cb.equal(usingByJoin.get(ID), values.get(0)) : null;
         }
 
         if (PROVIDER_ID.equals(field)) {
             return operator == Operator.EQ ? cb.equal(providerJoin.get(ID), values.get(0)) : null;
+        }
+
+        if (NAME.equals(field)) {
+            String keyword = values.get(0).toLowerCase();
+            String[] parts = keyword.split("\\s+");
+
+            List<Predicate> andPredicates = new ArrayList<>();
+
+            for (String part : parts) {
+                String likePattern = "%" + part + "%";
+
+                Expression<String> unaccentedPart = cb.function("unaccent", String.class, cb.literal(likePattern));
+
+                Expression<String> deviceName = cb.function("unaccent", String.class, cb.lower(root.get("name")));
+                Expression<String> specName = cb.function("unaccent", String.class, cb.lower(specificationJoin.get("name")));
+                Expression<String> specValue = cb.function("unaccent", String.class, cb.lower(specificationJoin.get("value")));
+
+                Predicate p1 = cb.like(deviceName, unaccentedPart);
+                Predicate p2 = cb.like(specName, unaccentedPart);
+                Predicate p3 = cb.like(specValue, unaccentedPart);
+
+                andPredicates.add(cb.or(p1, p2, p3));
+            }
+
+            return cb.and(andPredicates.toArray(new Predicate[0]));
         }
 
         return CriteriaUtils.createQueryByOperator(cb, root, field, operator, values, dateFormat);
