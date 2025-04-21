@@ -1,10 +1,13 @@
 package vn.nextcore.device.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import vn.nextcore.device.dto.resp.*;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.exception.HandlerException;
+import vn.nextcore.device.repository.DeliveryNoteRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm - dd/MM/yyyy");

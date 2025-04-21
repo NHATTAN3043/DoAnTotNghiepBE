@@ -84,6 +84,11 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                     device.setStatus("stock");
                 }
 
+                if ("maintenance".equals(request.getTypeNote())) {
+                    device.setUsingBy(null);
+                    device.setStatus("maintenance");
+                }
+
                 noteDevice.setDevice(device);
                 noteDevice.setDeliveryNote(deliveryNote);
                 noteDevices.add(noteDevice);

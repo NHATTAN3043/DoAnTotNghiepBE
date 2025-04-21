@@ -9,16 +9,14 @@ import vn.nextcore.device.dto.req.ApproveRequest;
 import vn.nextcore.device.dto.req.DataRequest;
 import vn.nextcore.device.dto.req.ReqTypesRequest;
 import vn.nextcore.device.dto.resp.ListRequestResponse;
+import vn.nextcore.device.dto.resp.ReqGroupResponse;
 import vn.nextcore.device.dto.resp.ReqResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.enums.StatusRequest;
 import vn.nextcore.device.exception.HandlerException;
-import vn.nextcore.device.repository.GroupRepository;
-import vn.nextcore.device.repository.ProjectRepository;
-import vn.nextcore.device.repository.RequestRepository;
-import vn.nextcore.device.repository.UserRepository;
+import vn.nextcore.device.repository.*;
 import vn.nextcore.device.repository.criteria.request.IRequestCriteriaRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.util.ParseUtils;
@@ -44,6 +42,9 @@ public class RequestService implements IRequestService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NoteDeviceRepository noteDeviceRepository;
 
 
     @Override
@@ -74,6 +75,7 @@ public class RequestService implements IRequestService {
                 newReqGroup.setGroup(group);
                 newReqGroup.setQuantity(typesRequest.getQuantity());
                 newReqGroup.setRequest(newRequest);
+                newReqGroup.setStatus("waiting");
                 requestGroups.add(newReqGroup);
             }
             newRequest.setRequestGroups(requestGroups);
@@ -116,6 +118,13 @@ public class RequestService implements IRequestService {
                 throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
             ReqResponse result = ParseUtils.convertRequestToReqResponse(request, "details");
+            for (ReqGroupResponse groupRes : result.getGroupRequest()) {
+                Integer resQuantity = noteDeviceRepository.countDeviceResByGroupIdAndRequestIdAndStatus(groupRes.getGroupId(), result.getRequestId(), "allocate");
+                groupRes.setResQuantity(resQuantity);
+                Integer recallQuantity = noteDeviceRepository.countDeviceResByGroupIdAndRequestIdAndStatus(groupRes.getGroupId(), result.getRequestId(), "retrieve");
+                groupRes.setRecalledQuantity(recallQuantity);
+            }
+
             return result;
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());

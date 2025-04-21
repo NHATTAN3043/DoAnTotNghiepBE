@@ -22,7 +22,7 @@ public class ReqGroupResponse {
 
     private Integer resQuantity;
 
-    private Integer remainingQuantity;
+    private Integer recalledQuantity;
 
     private String status;
 }
