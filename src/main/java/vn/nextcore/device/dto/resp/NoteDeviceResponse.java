@@ -18,5 +18,7 @@ public class NoteDeviceResponse {
 
     private Double priceMaintenance;
 
+    private DeliveryNoteResponse deliveryNoteResponse;
+
     private DeviceResponse device;
 }

@@ -31,6 +31,8 @@ public class DeviceResponse {
 
     private String dateMaintenance;
 
+    private Boolean isBroken;
+
     private GroupResponse group;
 
     private ProviderResponse provider;
@@ -39,5 +41,9 @@ public class DeviceResponse {
 
     private List<SpecificationResponse> specifications;
 
+    private List<NoteDeviceResponse> noteDeviceResponses;
+
     private String image;
+
+    private UserResponse usingBy;
 }

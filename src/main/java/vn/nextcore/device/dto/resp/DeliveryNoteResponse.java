@@ -28,6 +28,8 @@ public class DeliveryNoteResponse {
 
     private UserResponse createdBy;
 
+    private UserResponse assignee;
+
     private ProviderResponse provider;
 
     private List<NoteDeviceResponse> noteDeviceResponses;

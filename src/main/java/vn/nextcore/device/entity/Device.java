@@ -29,6 +29,7 @@ public class Device {
     public static final String DATE_BUY = "ngayMua";
     public static final String DATE_SELL = "ngayBan";
     public static final String DATE_MAINTENANCE = "thoiHanBaoTri";
+    public static final String IS_BROKEN = "biHong";
     public static final String UPDATED_AT = "updated_at";
     public static final String CREATED_AT = "created_at";
     public static final String DELETED_AT = "deleted_at";
@@ -71,6 +72,9 @@ public class Device {
 
     @Column(name = DATE_MAINTENANCE)
     private Date dateMaintenance;
+
+    @Column(name = IS_BROKEN)
+    private Boolean isBroken;
 
     @Column(name = UPDATED_AT)
     private Date updatedAt;

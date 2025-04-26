@@ -62,6 +62,7 @@ public enum ErrorCodeEnum {
     ER136("ER136", "DeliveryNoteId not exists"),
     ER123("ER123", "projectId not blank"),
     ER125("ER125", "groupId invalid"),
+    ER126("ER126", "providerId not exists"),
     ER404("ER404", "Not found");
 
     private final String code;

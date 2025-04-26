@@ -30,6 +30,8 @@ public class UserResponse {
 
     private RoleResponse role;
 
+    private DepartmentResponse department;
+
     public UserResponse(Long id, String userName, String email, String avatarUrl) {
         this.id = id;
         this.userName = userName;

@@ -18,8 +18,6 @@ import vn.nextcore.device.repository.DeviceRepository;
 import vn.nextcore.device.repository.ProviderRepository;
 import vn.nextcore.device.repository.RequestRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
-import vn.nextcore.device.service.request.IRequestService;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +39,17 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    private static final String ALLOCATE = "allocate";
+
+    private static final String RETRIEVE = "retrieve";
+
+    private static final String MAINTENANCE = "maintenance";
+
+    private static final String BROKEN = "broken";
+    private static final String STOCK = "stock";
+    private static final String ACTIVE = "active";
+    private static final String GOOD = "good";
+
     @Override
     @Transactional
     public DeliveryNoteResponse createDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request) {
@@ -59,6 +68,14 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             requestExists.setStatus(StatusRequest.REQUEST_PROGRESS.getStatus());
             deliveryNote.setRequest(requestExists);
 
+            if (request.getProviderId() != null && MAINTENANCE.equals(request.getTypeNote())) {
+                Provider provider = providerRepository.findProviderById(request.getProviderId());
+                if (provider == null) {
+                    throw new HandlerException(ErrorCodeEnum.ER126.getCode(), ErrorCodeEnum.ER126.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                }
+                deliveryNote.setProvider(provider);
+            }
+
             // add createBy
             User user = jwtUtil.extraUserFromRequest(httpRequest);
             deliveryNote.setCreatedBy(user);
@@ -74,21 +91,29 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                 noteDevice.setDescriptionDevice(note.getDescriptionDevice());
                 Device device = deviceRepository.findDeviceById(note.getDeviceId());
 
-                if ("allocate".equals(request.getTypeNote())) {
+                if (ALLOCATE.equals(request.getTypeNote())) {
                     device.setUsingBy(requestExists.getCreatedBy());
                     // change status device
-                    device.setStatus("active");
+                    device.setStatus(ACTIVE);
                 }
 
-                if ("retrieve".equals(request.getTypeNote())) {
+                if (RETRIEVE.equals(request.getTypeNote())) {
                     device.setUsingBy(null);
                     // change status device
-                    device.setStatus("stock");
+                    device.setStatus(STOCK);
                 }
 
-                if ("maintenance".equals(request.getTypeNote())) {
+                if (MAINTENANCE.equals(request.getTypeNote())) {
                     device.setUsingBy(null);
-                    device.setStatus("maintenance");
+                    device.setStatus(MAINTENANCE);
+                }
+
+                if (BROKEN.equals(note.getDescriptionDevice())) {
+                    device.setIsBroken(true);
+                }
+
+                if (GOOD.equals(note.getDescriptionDevice())) {
+                    device.setIsBroken(false);
                 }
 
                 noteDevice.setDevice(device);

@@ -11,6 +11,7 @@ import vn.nextcore.device.repository.GroupRepository;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import vn.nextcore.device.util.ParseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,17 +46,11 @@ public class GroupService implements IGroupService {
     }
 
     private GroupResponse handleInfoGroup(GroupRequest req, Group group) {
-        GroupResponse result = new GroupResponse();
-
         group.setName(req.getName());
         group.setQuantity(0);
         groupRepository.save(group);
 
-        result.setId(String.valueOf(group.getId()));
-        result.setName(group.getName());
-        result.setQuantity(group.getQuantity());
-
-        return result;
+        return ParseUtils.convertGroupToGroupResponse(group);
     }
 
     @Override
@@ -63,7 +58,7 @@ public class GroupService implements IGroupService {
         GroupResponse result = new GroupResponse();
         if (groupRepository.existsById(Long.valueOf(id))) {
             Group groupExists = groupRepository.findGroupById(Long.valueOf(id));
-            result.setId(String.valueOf(groupExists.getId()));
+            result.setId(groupExists.getId());
             result.setName(groupExists.getName());
             result.setQuantity(groupExists.getQuantity());
         } else {
@@ -92,7 +87,7 @@ public class GroupService implements IGroupService {
             List<Group> groupList = groupRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
             for (Group group : groupList) {
                 GroupResponse item = new GroupResponse();
-                item.setId(String.valueOf(group.getId()));
+                item.setId(group.getId());
                 item.setName(group.getName());
                 item.setQuantity(group.getQuantity());
 

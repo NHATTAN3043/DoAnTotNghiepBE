@@ -82,6 +82,8 @@ public class DeviceService implements IDeviceService {
 
     private int MAX_SIZE_IMAGES_UPLOAD = 5;
 
+    private static String METHOD_DETAILS = "details";
+
     @Override
     public DeviceResponse getInfoDevice(String id) {
         try {
@@ -92,7 +94,7 @@ public class DeviceService implements IDeviceService {
             if (deviceExists == null)
                 throw new HandlerException(ErrorCodeEnum.ER057.getCode(), ErrorCodeEnum.ER057.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
 
-            DeviceResponse result = ParseUtils.convertDeviceToDeviceRes(deviceExists, "infoUpdate");
+            DeviceResponse result = ParseUtils.convertDeviceToDeviceRes(deviceExists, METHOD_DETAILS);
             return result;
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DEVICE_PATH.getPath(), handlerException.getStatus());
@@ -137,11 +139,6 @@ public class DeviceService implements IDeviceService {
             ListDeviceResponse result = deviceCriteriaRepository.listDeviceCriteria(
                     status, ordDateBuy, ordDateMaintenance, Integer.valueOf(offset), Integer.valueOf(limit), filters
             );
-
-            // Check for empty results
-//            if (result.getTotalRecords() == 0) {
-//                throw new HandlerException(ErrorCodeEnum.ER043.getCode(), ErrorCodeEnum.ER043.getMessage(), HttpStatus.NOT_FOUND);
-//            }
 
             return result;
         } catch (HandlerException handlerException) {
@@ -194,6 +191,7 @@ public class DeviceService implements IDeviceService {
             }
 
             newDevice.setStatus(STATUS_STOCK);
+            newDevice.setIsBroken(false);
             newDevice.setCreatedAt(new Date());
             deviceRepository.save(newDevice);
 
