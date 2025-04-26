@@ -9,7 +9,7 @@ import lombok.Data;
 @Schema
 public class GroupResponse {
     @Schema
-    private String id;
+    private Long id;
 
     @Schema
     private String name;

@@ -17,12 +17,17 @@ public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm - dd/MM/yyyy");
 
+    private static String METHOD_LIST = "list";
+    private static String METHOD_DETAILS = "details";
+
+
     public static DeviceResponse convertDeviceToDeviceRes(Device device, String method) {
         try {
             DeviceResponse deviceResponse = new DeviceResponse();
             deviceResponse.setDeviceId(device.getId());
             deviceResponse.setName(device.getName());
-            if ("list".equals(method)) {
+            deviceResponse.setIsBroken(device.getIsBroken());
+            if (METHOD_LIST.equals(method)) {
                 deviceResponse.setGroupName(device.getGroup().getName());
                 deviceResponse.setProviderName(device.getProvider().getName());
                 String fistImg = null;
@@ -33,20 +38,18 @@ public class ParseUtils {
                 deviceResponse.setImage(fistImg);
             }
 
-            if ("infoUpdate".equals(method)) {
+            if (METHOD_DETAILS.equals(method)) {
                 deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy()) : "");
                 deviceResponse.setPriceSell(device.getPriceSell() != null ? String.valueOf(device.getPriceSell()) : "");
                 deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
-                GroupResponse groupResponse = new GroupResponse();
-                groupResponse.setId(device.getGroup().getId() != null ? String.valueOf(device.getGroup().getId()) : null);
-                groupResponse.setName(device.getGroup().getName());
-                deviceResponse.setGroup(groupResponse);
+                if (device.getUsingBy() != null) {
+                    deviceResponse.setUsingBy(convertUserToUserResponse(device.getUsingBy()));
+                }
 
-                ProviderResponse providerResponse = new ProviderResponse();
-                providerResponse.setId(device.getProvider().getId() != null ? device.getProvider().getId() : null);
-                providerResponse.setName(device.getProvider().getName());
-                deviceResponse.setProvider(providerResponse);
+                deviceResponse.setGroup(convertGroupToGroupResponse(device.getGroup()));
+
+                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider()));
 
                 List<ImageResponse> images = new ArrayList<>();
                 if (device.getImages() != null) {
@@ -55,6 +58,24 @@ public class ParseUtils {
                     ).collect(Collectors.toList());
                 }
                 deviceResponse.setImages(images);
+
+                List<NoteDevice> sortedNoteDevices = device.getNoteDevices()
+                        .stream()
+                        .sorted(Comparator.comparing(NoteDevice::getId))
+                        .collect(Collectors.toList());
+
+                List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
+
+                for (NoteDevice noteDevice: sortedNoteDevices) {
+                    NoteDeviceResponse noteDeviceResponse = new NoteDeviceResponse();
+                    noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
+                    noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
+                    noteDeviceResponse.setPriceMaintenance(noteDevice.getPriceDevice());
+                    noteDeviceResponse.setDeliveryNoteResponse(convertDeliveryNoteToDeliveryNoteRes(noteDevice.getDeliveryNote()));
+
+                    noteDeviceResponses.add(noteDeviceResponse);
+                }
+                deviceResponse.setNoteDeviceResponses(noteDeviceResponses);
             }
 
             List<SpecificationResponse> specifications = new ArrayList<>();
@@ -67,7 +88,7 @@ public class ParseUtils {
             deviceResponse.setDateBuy(dateFormat.format(device.getDateBuy()));
             deviceResponse.setDateMaintenance(dateFormat.format(device.getDateMaintenance()));
             deviceResponse.setDescription(device.getDescription());
-
+            deviceResponse.setStatus(device.getStatus());
 
             return deviceResponse;
         } catch (Exception e) {
@@ -90,28 +111,14 @@ public class ParseUtils {
             if (request.getApprovedDate() != null)
                 reqResponse.setApprovedDate(timeFormat.format(request.getApprovedDate()));
 
-            UserResponse user = new UserResponse();
-            user.setUserName(request.getCreatedBy().getUserName());
-            user.setEmail(request.getCreatedBy().getEmail());
-            user.setGender(request.getCreatedBy().getGender());
-            user.setPhoneNumber(request.getCreatedBy().getPhoneNumber());
-            user.setId(request.getCreatedBy().getId());
-            user.setAvatarUrl(request.getCreatedBy().getAvatarUrl());
-            user.setRole(new RoleResponse(request.getCreatedBy().getRole().getId(), request.getCreatedBy().getRole().getName()));
-            reqResponse.setCreatedBy(user);
+            reqResponse.setCreatedBy(convertUserToUserResponse(request.getCreatedBy()));
+
             if (request.getApprover() != null) {
-                UserResponse approver = new UserResponse();
-                approver.setUserName(request.getCreatedBy().getUserName());
-                approver.setEmail(request.getCreatedBy().getEmail());
-                approver.setGender(request.getCreatedBy().getGender());
-                approver.setId(request.getCreatedBy().getId());
-                approver.setAvatarUrl(request.getCreatedBy().getAvatarUrl());
-                approver.setRole(new RoleResponse(request.getCreatedBy().getRole().getId(), request.getCreatedBy().getRole().getName()));
-                reqResponse.setApproveBy(approver);
+                reqResponse.setApproveBy(convertUserToUserResponse(request.getApprover()));
             }
 
             // convert extra details
-            if ("details".equals(method)) {
+            if (METHOD_DETAILS.equals(method)) {
                 if (request.getRequestGroups() != null && !request.getRequestGroups().isEmpty()) {
                     List<ReqGroupResponse> reqGroupResponses = new ArrayList<>();
                     for (RequestGroup requestGroup : request.getRequestGroups()) {
@@ -141,18 +148,10 @@ public class ParseUtils {
                         deliveryNoteResponse.setTimeCreated(timeFormat.format(deliveryNote.getDeliveryDate()));
                         deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
                         deliveryNoteResponse.setDescription(deliveryNote.getDescription());
-                        UserResponse createdBy = new UserResponse();
-                        createdBy.setId(deliveryNote.getCreatedBy().getId());
-                        createdBy.setUserName(deliveryNote.getCreatedBy().getUserName());
-                        createdBy.setEmail(deliveryNote.getCreatedBy().getEmail());
-                        createdBy.setAvatarUrl(deliveryNote.getCreatedBy().getAvatarUrl());
-                        createdBy.setRole(new RoleResponse(deliveryNote.getCreatedBy().getRole().getId(), deliveryNote.getCreatedBy().getRole().getName()));
-                        deliveryNoteResponse.setCreatedBy(createdBy);
+                        deliveryNoteResponse.setCreatedBy(convertUserToUserResponse(deliveryNote.getCreatedBy()));
 
                         if (deliveryNote.getProvider() != null) {
-                            deliveryNoteResponse.setProvider(new ProviderResponse(deliveryNote.getProvider().getId(),
-                                    deliveryNote.getProvider().getName(), deliveryNote.getProvider().getAddress(),
-                                    deliveryNote.getProvider().getPhoneNumber()));
+                            deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider()));
                         }
                         List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
                         for (NoteDevice noteDevice : deliveryNote.getNoteDevices()) {
@@ -192,6 +191,82 @@ public class ParseUtils {
             return reqResponse;
         } catch (Exception e) {
             e.printStackTrace();
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static DeliveryNoteResponse convertDeliveryNoteToDeliveryNoteRes(DeliveryNote deliveryNote) {
+        try {
+            DeliveryNoteResponse deliveryNoteResponse = new DeliveryNoteResponse();
+
+            if (deliveryNote != null) {
+                deliveryNoteResponse.setDeliveryNoteId(deliveryNote.getId());
+                deliveryNoteResponse.setTypeAction(deliveryNote.getTypeNote());
+                deliveryNoteResponse.setDescription(deliveryNote.getDescription());
+                deliveryNoteResponse.setTimeCreated(timeFormat.format(deliveryNote.getCreatedAt()));
+                deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
+                deliveryNoteResponse.setCreatedBy(convertUserToUserResponse(deliveryNote.getCreatedBy()));
+                deliveryNoteResponse.setAssignee(convertUserToUserResponse(deliveryNote.getRequest().getCreatedBy()));
+                deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider()));
+            }
+
+            return deliveryNoteResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static UserResponse convertUserToUserResponse(User user) {
+        try {
+            UserResponse userResponse = new UserResponse();
+
+            if (user != null) {
+                userResponse.setId(user.getId());
+                userResponse.setUserName(user.getUserName());
+                userResponse.setEmail(user.getEmail());
+                userResponse.setGender(user.getGender());
+                userResponse.setPhoneNumber(user.getPhoneNumber());
+                userResponse.setAvatarUrl(user.getAvatarUrl());
+                userResponse.setAddress(user.getAddress());
+                userResponse.setDateOfBirth(dateFormat.format(user.getDateOfBirth()));
+                userResponse.setRole(new RoleResponse(user.getRole().getId(), user.getRole().getName()));
+                userResponse.setDepartment(new DepartmentResponse(user.getDepartment().getId(), user.getDepartment().getName()));
+            }
+
+            return userResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static GroupResponse convertGroupToGroupResponse (Group group) {
+        try {
+            GroupResponse groupResponse = new GroupResponse();
+
+            if (groupResponse != null) {
+                groupResponse.setId(group.getId());
+                groupResponse.setName(group.getName());
+                groupResponse.setQuantity(group.getQuantity());
+            }
+
+            return groupResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static ProviderResponse convertProviderToProviderResponse (Provider provider) {
+        try {
+            ProviderResponse providerResponse = new ProviderResponse();
+            if (provider != null) {
+                providerResponse.setId(provider.getId());
+                providerResponse.setName(provider.getName());
+                providerResponse.setAddress(provider.getAddress());
+                providerResponse.setPhoneNumber(provider.getPhoneNumber());
+            }
+
+            return providerResponse;
+        } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
