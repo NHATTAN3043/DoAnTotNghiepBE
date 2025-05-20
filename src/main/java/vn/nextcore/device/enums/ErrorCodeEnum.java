@@ -63,7 +63,10 @@ public enum ErrorCodeEnum {
     ER123("ER123", "projectId not blank"),
     ER125("ER125", "groupId invalid"),
     ER126("ER126", "providerId not exists"),
-    ER404("ER404", "Not found");
+    ER127("ER127", "roleId not exists"),
+    ER138("ER128", "departmentId not exists"),
+    ER404("ER404", "Not found"),
+    ER403("ER403", "FOR BIDDEN");
 
     private final String code;
 

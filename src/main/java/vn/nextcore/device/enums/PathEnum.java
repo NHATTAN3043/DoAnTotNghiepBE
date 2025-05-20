@@ -8,6 +8,7 @@ public enum PathEnum {
     VERIFY_EMAIL_PATH("/api/forgotPassword/verifyMail"),
     REFRESH_TOKEN_PATH("/auth/refreshtoken"),
     DELIVERY_PATH("/auth/delivery"),
+    USER_PATH("/api/user"),
     REQUEST_PATH("/api/request");
 
 

@@ -228,9 +228,15 @@ public class ParseUtils {
                 userResponse.setPhoneNumber(user.getPhoneNumber());
                 userResponse.setAvatarUrl(user.getAvatarUrl());
                 userResponse.setAddress(user.getAddress());
-                userResponse.setDateOfBirth(dateFormat.format(user.getDateOfBirth()));
-                userResponse.setRole(new RoleResponse(user.getRole().getId(), user.getRole().getName()));
-                userResponse.setDepartment(new DepartmentResponse(user.getDepartment().getId(), user.getDepartment().getName()));
+                if (user.getDateOfBirth() != null) {
+                    userResponse.setDateOfBirth(dateFormat.format(user.getDateOfBirth()));
+                }
+                if (user.getRole() != null) {
+                    userResponse.setRole(new RoleResponse(user.getRole().getId(), user.getRole().getName()));
+                }
+                if (user.getDepartment() != null) {
+                    userResponse.setDepartment(new DepartmentResponse(user.getDepartment().getId(), user.getDepartment().getName()));
+                }
             }
 
             return userResponse;

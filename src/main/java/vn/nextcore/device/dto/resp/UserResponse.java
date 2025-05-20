@@ -38,4 +38,8 @@ public class UserResponse {
         this.email = email;
         this.avatarUrl = avatarUrl;
     }
+
+    public UserResponse(Long id) {
+        this.id = id;
+    }
 }

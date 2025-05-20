@@ -84,6 +84,9 @@ public class GlobalExceptionHandler {
         errorMap.put("ER132", "sortCreatedDate must in desc|asc");
         errorMap.put("ER133", "sortApprovedDate must in desc|asc");
         errorMap.put("ER134", "type not exists");
+        errorMap.put("ER136", "phone number not blank");
+        errorMap.put("ER137", "roleId not blank");
+        errorMap.put("ER138", "departmentId not blank");
     }
 
     @ExceptionHandler(HandlerException.class)
