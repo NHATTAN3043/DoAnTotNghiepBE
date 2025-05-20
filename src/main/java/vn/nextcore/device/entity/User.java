@@ -36,6 +36,9 @@ public class User {
     public static final String USING_BY = "usingBy";
     public static final String USER_ASSIGNED = "userAssigned";
     public static final String APPROVER = "approver";
+    public static final String UPDATED_AT = "updated_at";
+    public static final String CREATED_AT = "created_at";
+    public static final String DELETED_AT = "deleted_at";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +54,7 @@ public class User {
     @Column(name = PHONE_NUMBER, length = 20)
     private String phoneNumber;
 
-    @Column(name = GENDER, nullable = false)
+    @Column(name = GENDER)
     private String gender;
 
     @Column(name = DATE_OF_BIRTH)
@@ -63,9 +66,18 @@ public class User {
     @Column(name = AVATAR_URL, length = 500)
     private String avatarUrl;
 
-    @Column(name = PASSWORD)
+    @Column(name = PASSWORD, nullable = false)
     @Size(min = 6, max = 500)
     private String password;
+
+    @Column(name = UPDATED_AT)
+    private Date updatedAt;
+
+    @Column(name = CREATED_AT)
+    private Date createdAt;
+
+    @Column(name = DELETED_AT)
+    private Date deletedAt;
 
     @ManyToOne
     @JoinColumn(name = ROLE_ID)
