@@ -43,6 +43,22 @@ public class UserController {
         return new DataResponse<>(result);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/{id}")
+    public DataResponse<UserResponse> getUser(
+            @PathVariable("id") String userId) {
+        UserResponse result = userService.getUser(userId);
+        return new DataResponse<>(result);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping(value = "/{id}")
+    public DataResponse<UserResponse> disableUser(
+            @PathVariable("id") String userId) {
+        UserResponse result = userService.deleteUser(userId);
+        return new DataResponse<>(result);
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public DataResponse<List<UserResponse>> getAllUsers() {
