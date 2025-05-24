@@ -16,6 +16,7 @@ import vn.nextcore.device.repository.UserRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtUtil {
@@ -38,16 +39,6 @@ public class JwtUtil {
     public String generateAccessToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                .compact();
-    }
-
-    public String generateAccessToken(String email, List<String> roles) {
-        return Jwts.builder()
-                .setSubject(email)
-                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)

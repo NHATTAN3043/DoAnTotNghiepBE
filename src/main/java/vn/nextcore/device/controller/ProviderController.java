@@ -18,7 +18,7 @@ import vn.nextcore.device.service.specification.ISpecificationService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/provider")
+@RequestMapping("/api/provider")
 public class ProviderController {
     @Autowired
     private IProviderService providerService;

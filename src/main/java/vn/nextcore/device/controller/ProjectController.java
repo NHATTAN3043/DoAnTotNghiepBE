@@ -13,7 +13,7 @@ import vn.nextcore.device.service.project.IProjectService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/project")
+@RequestMapping("/api/project")
 public class ProjectController {
     @Autowired
     private IProjectService projectService;
