@@ -13,7 +13,6 @@ import vn.nextcore.device.dto.resp.DepartmentResponse;
 import vn.nextcore.device.dto.resp.RoleResponse;
 import vn.nextcore.device.dto.resp.UserResponse;
 import vn.nextcore.device.entity.Department;
-import vn.nextcore.device.entity.Group;
 import vn.nextcore.device.entity.Role;
 import vn.nextcore.device.entity.User;
 import vn.nextcore.device.enums.ErrorCodeEnum;
@@ -25,9 +24,11 @@ import vn.nextcore.device.repository.UserRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.service.storageFiles.IStorageService;
 import vn.nextcore.device.util.ParseUtils;
+import vn.nextcore.device.validation.HandlerValidateParams;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -79,6 +80,9 @@ public class UserService implements IUserService {
     public UserResponse createUser(HttpServletRequest request, UserRequest userRequest) {
         User newUser = new User();
         try {
+            if (userRequest.getPassword() == null) {
+                throw new HandlerException(ErrorCodeEnum.ER002.getCode(), ErrorCodeEnum.ER002.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
             User user = jwtUtil.extraUserFromRequest(request);
             if (user.getRole().getId() != 3) {
                 throw new HandlerException(ErrorCodeEnum.ER403.getCode(), ErrorCodeEnum.ER403.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.FORBIDDEN);
@@ -123,14 +127,18 @@ public class UserService implements IUserService {
     @Transactional
     public UserResponse updateUser(String id, UserRequest userRequest) {
         try {
-            User user = userRepository.findUserById(Long.parseLong(id));
+            HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER140);
+
+            User user = userRepository.findUserByIdAndDeletedAtIsNull(Long.parseLong(id));
             user.setUserName(userRequest.getUserName());
             user.setPhoneNumber(userRequest.getPhoneNumber());
             user.setGender(userRequest.getGender());
             user.setDateOfBirth(dateFormat.parse(userRequest.getDateOfBirth()));
             user.setAddress(userRequest.getAddress());
             user.setEmail(userRequest.getEmail());
-            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+            if (userRequest.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+            }
             Department department = departmentRepository.findDepartmentById(userRequest.getDepartmentId());
             if (department == null) {
                 throw new HandlerException(ErrorCodeEnum.ER138.getCode(), ErrorCodeEnum.ER138.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
@@ -158,10 +166,41 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public UserResponse getUser(String id) {
+        try {
+            HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER140);
+            User user = userRepository.findUserByIdAndDeletedAtIsNull(Long.parseLong(id));
+            if (user == null) {
+                throw new HandlerException(ErrorCodeEnum.ER138.getCode(), ErrorCodeEnum.ER138.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+            UserResponse userResponse = ParseUtils.convertUserToUserResponse(user);
+            return userResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public UserResponse deleteUser(String id) {
+        try {
+            HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER140);
+            User user = userRepository.findUserByIdAndDeletedAtIsNull(Long.parseLong(id));
+            if (user == null) {
+                throw new HandlerException(ErrorCodeEnum.ER138.getCode(), ErrorCodeEnum.ER138.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+            user.setDeletedAt(new Date());
+            userRepository.save(user);
+            return new UserResponse(user.getId());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
     public List<UserResponse> getAllUsers() {
         List<UserResponse> userResponseList = new ArrayList<>();
         try {
-            List<User> users = userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+            List<User> users = userRepository.findAllByDeletedAtIsNull(Sort.by(Sort.Direction.DESC, "id"));
             if (users != null && !users.isEmpty()) {
                 for (User user : users) {
                     UserResponse userResponse = ParseUtils.convertUserToUserResponse(user);

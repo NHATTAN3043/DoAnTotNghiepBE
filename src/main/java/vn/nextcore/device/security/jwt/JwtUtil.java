@@ -15,6 +15,8 @@ import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.UserRepository;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtUtil {
@@ -69,7 +71,7 @@ public class JwtUtil {
             }
 
             if (userRepository.existsById(Long.valueOf(id))) {
-                User user = userRepository.findUserById(Long.valueOf(id));
+                User user = userRepository.findUserByIdAndDeletedAtIsNull(Long.valueOf(id));
                 return generateAccessToken(user.getEmail());
             } else {
                 throw new HandlerException(ErrorCodeEnum.ER100.getCode(), ErrorCodeEnum.ER100.getMessage(), PathEnum.REFRESH_TOKEN_PATH.getPath(), HttpStatus.UNAUTHORIZED);

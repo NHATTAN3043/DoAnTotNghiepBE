@@ -29,7 +29,6 @@ public class UserRequest {
 
     private MultipartFile avatar;
 
-    @NotBlank(message = "ER002")
     private String password;
 
     @NotNull(message = "ER138")

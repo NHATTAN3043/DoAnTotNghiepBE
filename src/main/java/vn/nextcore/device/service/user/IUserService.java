@@ -16,6 +16,10 @@ public interface IUserService {
 
     UserResponse updateUser(String id, UserRequest userRequest);
 
+    UserResponse getUser(String id);
+
+    UserResponse deleteUser(String id);
+
     List<UserResponse> getAllUsers();
 
     List<RoleResponse> getRoles();
