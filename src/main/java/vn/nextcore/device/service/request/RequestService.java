@@ -14,7 +14,7 @@ import vn.nextcore.device.dto.resp.ReqResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
-import vn.nextcore.device.enums.StatusRequest;
+import vn.nextcore.device.enums.Status;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.*;
 import vn.nextcore.device.repository.criteria.request.IRequestCriteriaRepository;
@@ -80,7 +80,7 @@ public class RequestService implements IRequestService {
             }
             newRequest.setRequestGroups(requestGroups);
             newRequest.setCreatedDate(new Date());
-            newRequest.setStatus(StatusRequest.REQUEST_PENDING.getStatus());
+            newRequest.setStatus(Status.REQUEST_PENDING.getStatus());
             newRequest.setRequestType(dataRequest.getRequestType());
             requestRepository.save(newRequest);
             return new ReqResponse(newRequest.getId());

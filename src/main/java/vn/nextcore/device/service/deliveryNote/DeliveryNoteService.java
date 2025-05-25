@@ -11,7 +11,7 @@ import vn.nextcore.device.dto.resp.DeliveryNoteResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
-import vn.nextcore.device.enums.StatusRequest;
+import vn.nextcore.device.enums.Status;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.DeliveryNoteRepository;
 import vn.nextcore.device.repository.DeviceRepository;
@@ -65,7 +65,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             if (requestExists == null) {
                 throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
-            requestExists.setStatus(StatusRequest.REQUEST_PROGRESS.getStatus());
+            requestExists.setStatus(Status.REQUEST_PROGRESS.getStatus());
             deliveryNote.setRequest(requestExists);
 
             if (request.getProviderId() != null && MAINTENANCE.equals(request.getTypeNote())) {

@@ -9,6 +9,7 @@ public enum PathEnum {
     REFRESH_TOKEN_PATH("/auth/refreshtoken"),
     DELIVERY_PATH("/auth/delivery"),
     USER_PATH("/api/user"),
+    STATISTICS_PATH("/api/statistics"),
     REQUEST_PATH("/api/request");
 
 

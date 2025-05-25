@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -31,6 +33,8 @@ public class UserResponse {
     private RoleResponse role;
 
     private DepartmentResponse department;
+
+    private List<DeviceResponse> deviceResponseList = new ArrayList<>();
 
     public UserResponse(Long id, String userName, String email, String avatarUrl) {
         this.id = id;

@@ -1,17 +1,21 @@
 package vn.nextcore.device.enums;
 
-public enum StatusRequest {
+public enum Status {
     REQUEST_PENDING("pending"),
-
     REQUEST_APPROVED("approved"),
-
     REQUEST_REJECTED("rejected"),
     REQUEST_PROGRESS("progress"),
-    REQUEST_DONE("done");
+    REQUEST_DONE("done"),
+    DEVICE_STOCK("stock"),
+    DEVICE_MAINTENANCE("maintenance"),
+    DEVICE_ACTIVE("active"),
+    ACTION_ALLOCATE("allocate"),
+    ACTION_MAINTENANCE("maintenance"),
+    ACTION_RETRIEVE("retrieve");
 
     private final String status;
 
-    StatusRequest(String status) {
+    Status(String status) {
         this.status = status;
     }
 

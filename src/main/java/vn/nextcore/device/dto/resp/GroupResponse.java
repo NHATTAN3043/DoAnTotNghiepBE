@@ -16,4 +16,10 @@ public class GroupResponse {
 
     @Schema
     private Integer quantity;
+
+    private Integer usedQuantity;
+
+    private Integer stockQuantity;
+
+    private Integer MaintenanceQuantity;
 }
