@@ -38,7 +38,7 @@ public class SecurityConfig {
                     .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
                             "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**", "/ws/**").permitAll()
                     .requestMatchers("/api/request/**", "/api/group/**", "/api/project").hasAnyAuthority("Employee", "Back Office", "Manager")
-                    .requestMatchers("/api/device/**", "/api/delivery/**", "/api/specification/**", "/api/provider/**").hasAnyAuthority("Back Office", "Manager")
+                    .requestMatchers("/api/device/**", "/api/delivery/**", "/api/specification/**", "/api/provider/**", "/api/statistics/**").hasAnyAuthority("Back Office", "Manager")
                     .requestMatchers("/api/user/**").hasAuthority("Manager")
                     .anyRequest().authenticated()
             )

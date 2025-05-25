@@ -11,7 +11,7 @@ public class AuthRequest {
     @NotBlank(message = "ER001")
 //    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n", message = "ER003")
     @Size(max = 100, message = "ER006")
-    @Schema(example = "21115053120244@sv.ute.udn.vn")
+    @Schema(example = "admin@gmail.com")
     private String email;
 
     @NotBlank(message = "ER002")

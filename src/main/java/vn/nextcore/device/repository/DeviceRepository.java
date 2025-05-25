@@ -18,6 +18,12 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     List<Device> findDeviceByDateMaintenanceBetween(Date start, Date end);
 
+    Integer countDeviceByDeletedAtIsNull();
+
+    Integer countDeviceByStatusAndDeletedAtIsNull(String status);
+
+    Integer countDeviceByGroupIdAndStatusAndDeletedAtIsNull(Long groupId, String status);
+
     @Query("SELECT COUNT(s) > 0 FROM Device d JOIN d.specifications s " +
             "WHERE d.id = :deviceId AND s.id = :specificationId")
     boolean existsByDeviceIdAndSpecificationId(@Param("deviceId") Long deviceId,

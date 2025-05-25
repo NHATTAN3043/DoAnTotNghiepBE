@@ -66,6 +66,8 @@ public enum ErrorCodeEnum {
     ER127("ER127", "roleId not exists"),
     ER138("ER128", "departmentId not exists"),
     ER140("ER140", "userId must be positive integer"),
+    ER141("ER141", "year not null"),
+    ER142("ER142", "year invalid"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

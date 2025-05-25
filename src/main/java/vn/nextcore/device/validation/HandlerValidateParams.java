@@ -17,6 +17,7 @@ public class HandlerValidateParams {
     private static final String REGEX_DATE_FORMAT = "^\\d{2}/\\d{2}/\\d{4}$";
     private static final String REGEX_OTP = "^\\d{6}$";
     private static final String REGEX_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    private static final String REGEX_YEAR = "^(20\\d{2}|2[1-9]\\d{2})$";
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -96,6 +97,16 @@ public class HandlerValidateParams {
             if (startDate.isAfter(endDate)) {
                 throw new HandlerException(errorCodeEnum.getCode(), errorCodeEnum.getMessage(), HttpStatus.BAD_REQUEST);
             }
+        }
+    }
+
+    public static void validateYear(String value, ErrorCodeEnum errorCodeEnum) {
+        if (value != null && !value.isEmpty()) {
+            if (!value.matches(REGEX_YEAR)) {
+                throw new HandlerException(errorCodeEnum.getCode(), errorCodeEnum.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            throw new HandlerException(ErrorCodeEnum.ER141.getCode(), ErrorCodeEnum.ER141.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

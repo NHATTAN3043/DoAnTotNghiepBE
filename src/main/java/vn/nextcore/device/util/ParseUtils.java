@@ -237,6 +237,12 @@ public class ParseUtils {
                 if (user.getDepartment() != null) {
                     userResponse.setDepartment(new DepartmentResponse(user.getDepartment().getId(), user.getDepartment().getName()));
                 }
+                if (user.getDevicesUsing() != null) {
+                    for (Device device : user.getDevicesUsing()) {
+                        DeviceResponse deviceResponse = convertDeviceToDeviceRes(device, METHOD_LIST);
+                        userResponse.getDeviceResponseList().add(deviceResponse);
+                    }
+                }
             }
 
             return userResponse;
@@ -253,6 +259,25 @@ public class ParseUtils {
                 groupResponse.setId(group.getId());
                 groupResponse.setName(group.getName());
                 groupResponse.setQuantity(group.getQuantity());
+            }
+
+            return groupResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static GroupResponse convertGroupToGroupResponse (Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity) {
+        try {
+            GroupResponse groupResponse = new GroupResponse();
+
+            if (groupResponse != null) {
+                groupResponse.setId(group.getId());
+                groupResponse.setName(group.getName());
+                groupResponse.setQuantity(group.getQuantity());
+                groupResponse.setUsedQuantity(activeQuantity);
+                groupResponse.setStockQuantity(stockQuantity);
+                groupResponse.setMaintenanceQuantity(maintenanceQuantity);
             }
 
             return groupResponse;

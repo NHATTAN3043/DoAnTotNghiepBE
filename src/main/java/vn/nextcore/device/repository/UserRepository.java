@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.entity.User;
@@ -19,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     List<User> findAllByDeletedAtIsNull(Sort sort);
+
+    @Query(value = "SELECT * FROM \"NGUOIDUNG\" WHERE LOWER(unaccent(ten)) LIKE LOWER(unaccent(CONCAT('%', :keyword, '%')))", nativeQuery = true)
+    List<User> searchByTenIgnoreCaseAndAccent(@Param("keyword") String keyword);
 
     @Transactional
     @Modifying

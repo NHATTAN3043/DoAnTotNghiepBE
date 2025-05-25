@@ -122,4 +122,12 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/user/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi statisticsApi() {
+        return GroupedOpenApi.builder()
+                .group("api-statistics")
+                .pathsToMatch("/api/statistics/**")
+                .build();
+    }
 }
