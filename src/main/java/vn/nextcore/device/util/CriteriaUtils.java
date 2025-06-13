@@ -11,6 +11,7 @@ import vn.nextcore.device.exception.HandlerException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class CriteriaUtils {
@@ -22,7 +23,13 @@ public class CriteriaUtils {
                 return cb.like(unaccentedField, unaccentedValue);
 //                return cb.like(cb.lower(root.get(field)), "%" + values.get(0).toLowerCase() + "%");
             case EQ:
-                return cb.equal(root.get(field), ParseUtils.parseValue(field, values.get(0), dateFormat));
+                Object parsedValue = ParseUtils.parseValue(field, values.get(0), dateFormat);
+                if (parsedValue instanceof Date) {
+                    Expression<Date> truncatedField = cb.function("date_trunc", Date.class, cb.literal("day"), root.get(field));
+                    return cb.equal(truncatedField, parsedValue);
+                } else {
+                    return cb.equal(root.get(field), parsedValue);
+                }
             case GTE:
                 return cb.greaterThanOrEqualTo(root.get(field), (Comparable) ParseUtils.parseValue(field, values.get(0), dateFormat));
             case LTE:

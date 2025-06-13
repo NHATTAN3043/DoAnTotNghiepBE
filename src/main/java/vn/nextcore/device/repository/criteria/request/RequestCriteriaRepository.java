@@ -6,23 +6,24 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import vn.nextcore.device.dto.resp.DeviceResponse;
-import vn.nextcore.device.dto.resp.ListDeviceResponse;
+import vn.nextcore.device.dto.req.FilterRequest;
 import vn.nextcore.device.dto.resp.ListRequestResponse;
 import vn.nextcore.device.dto.resp.ReqResponse;
-import vn.nextcore.device.entity.Device;
-import vn.nextcore.device.entity.Provider;
 import vn.nextcore.device.entity.Request;
 import vn.nextcore.device.entity.User;
 import vn.nextcore.device.enums.ErrorCodeEnum;
+import vn.nextcore.device.enums.Operator;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.exception.HandlerException;
+import vn.nextcore.device.util.CheckerUtils;
+import vn.nextcore.device.util.CriteriaUtils;
 import vn.nextcore.device.util.ParseUtils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
 
 @Repository
 public class RequestCriteriaRepository implements IRequestCriteriaRepository{
@@ -35,7 +36,7 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
-    public ListRequestResponse listRequestsCriteria(String title, String createdDate, String approvedDate, String status, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit) {
+    public ListRequestResponse listRequestsCriteria(String title, String status, String exceptStatus, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit, List<FilterRequest> dateFilters) {
         ListRequestResponse response = new ListRequestResponse();
         try {
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -56,12 +57,8 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
                 predicates.add(cb.equal(cb.lower(requestRoot.get("status")), status.toLowerCase()));
             }
 
-            if (createdDate != null) {
-                predicates.add(cb.equal(cb.function("date", Date.class, requestRoot.get("createdDate")), dateFormat.parse(createdDate)));
-            }
-
-            if (approvedDate != null) {
-                predicates.add(cb.equal(cb.function("date", Date.class, requestRoot.get("approvedDate")), dateFormat.parse(approvedDate)));
+            if (exceptStatus != null) {
+                predicates.add(cb.notEqual(cb.lower(requestRoot.get("status")), exceptStatus.toLowerCase()));
             }
 
             if (type != null) {
@@ -72,6 +69,15 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
                 predicates.add(cb.equal(userJoin.get("id"), createdBy));
             }
 
+            for (FilterRequest filter : dateFilters) {
+                if (filter.getValues().size() >= 1 && CheckerUtils.checkIsNotEmptyValues(filter.getValues())) {
+                    Predicate predicate = handleFilterRequest(cb, requestRoot, filter, dateFormat);
+                    if (predicate != null) {
+                        predicates.add(predicate);
+                    }
+                }
+            }
+
             // using query
             createQuery.where(predicates.toArray(new Predicate[0]));
 
@@ -80,8 +86,14 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
 
             // Create List order by
             List<Order> orderList = new ArrayList<>();
-            addOrderCondition(cb, requestRoot, "createdDate", sortCreatedDate, orderList);
-            addOrderCondition(cb, requestRoot, "approvedDate", sortApprovedDate, orderList);
+            if (sortCreatedDate == null) {
+                addOrderCondition(cb, requestRoot, "createdDate", "desc", orderList);
+            } else {
+                addOrderCondition(cb, requestRoot, "createdDate", sortCreatedDate, orderList);
+            }
+            if (sortApprovedDate != null) {
+                addOrderCondition(cb, requestRoot, "approvedDate", sortApprovedDate, orderList);
+            }
 
             // Default sort by deviceId if no sorting is specified
             if (orderList.isEmpty()) {
@@ -129,5 +141,13 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
                 orderList.add(cb.desc(cb.min(root.get(sortField))));
             }
         }
+    }
+
+    private Predicate handleFilterRequest(CriteriaBuilder cb, Root<Request> root, FilterRequest filter, SimpleDateFormat dateFormat) throws ParseException, HandlerException {
+        Operator operator = Operator.fromString(filter.getOperator());
+        String field = filter.getField();
+        List<String> values = filter.getValues();
+
+        return CriteriaUtils.createQueryByOperator(cb, root, field, operator, values, dateFormat);
     }
 }

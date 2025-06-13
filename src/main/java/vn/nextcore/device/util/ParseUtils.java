@@ -39,7 +39,7 @@ public class ParseUtils {
             }
 
             if (METHOD_DETAILS.equals(method)) {
-                deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy()) : "");
+                deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy().longValue()) : "");
                 deviceResponse.setPriceSell(device.getPriceSell() != null ? String.valueOf(device.getPriceSell()) : "");
                 deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
@@ -304,7 +304,7 @@ public class ParseUtils {
 
     // parse string to date if field is date
     public static Object parseValue(String field, String value, SimpleDateFormat dateFormat) throws ParseException {
-        if (field.startsWith("date")) {
+        if (field.toLowerCase().contains("date")) {
             return dateFormat.parse(value);
         }
         return value;

@@ -38,13 +38,9 @@ public class DeliveryNoteService implements IDeliveryNoteService {
 
     @Autowired
     private JwtUtil jwtUtil;
-
     private static final String ALLOCATE = "allocate";
-
     private static final String RETRIEVE = "retrieve";
-
     private static final String MAINTENANCE = "maintenance";
-
     private static final String BROKEN = "broken";
     private static final String STOCK = "stock";
     private static final String ACTIVE = "active";
@@ -93,8 +89,6 @@ public class DeliveryNoteService implements IDeliveryNoteService {
 
                 if (ALLOCATE.equals(request.getTypeNote())) {
                     device.setUsingBy(requestExists.getCreatedBy());
-                    // change status device
-                    device.setStatus(ACTIVE);
                 }
 
                 if (RETRIEVE.equals(request.getTypeNote())) {
@@ -140,10 +134,13 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                 throw new HandlerException(ErrorCodeEnum.ER102.getCode(), ErrorCodeEnum.ER102.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.UNAUTHORIZED);
             }
 
-            if (user.getId() != deliveryNote.getRequest().getCreatedBy().getId()) {
+            if (!user.getId().equals(deliveryNote.getRequest().getCreatedBy().getId()) ) {
                 throw new HandlerException(ErrorCodeEnum.ER136.getCode(), ErrorCodeEnum.ER136.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
 
+            for (NoteDevice noteDevice : deliveryNote.getNoteDevices()) {
+                noteDevice.getDevice().setStatus(ACTIVE);
+            }
             deliveryNote.setIsConfirm(data.getIsConfirm());
             deliveryNoteRepository.save(deliveryNote);
             return new DeliveryNoteResponse(deliveryNote.getId());

@@ -64,10 +64,14 @@ public enum ErrorCodeEnum {
     ER125("ER125", "groupId invalid"),
     ER126("ER126", "providerId not exists"),
     ER127("ER127", "roleId not exists"),
-    ER138("ER128", "departmentId not exists"),
+    ER138("ER138", "departmentId not exists"),
+    ER139("ER139", "The user still has devices that have not been returned"),
     ER140("ER140", "userId must be positive integer"),
     ER141("ER141", "year not null"),
     ER142("ER142", "year invalid"),
+    ER143("ER143", "date param invalid format dd/MM/yyyy"),
+    ER144("ER144", "date param invalid"),
+    ER145("ER145", "device can't update because not in stock"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

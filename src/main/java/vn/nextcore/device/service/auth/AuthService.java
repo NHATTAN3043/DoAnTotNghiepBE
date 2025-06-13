@@ -49,19 +49,23 @@ public class AuthService implements IAuthService {
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String accessToken = jwtUtil.generateAccessToken(authRequest.getEmail());
-            authResponse.setAccessToken(accessToken);
 
-            if (userRepository.existsByEmail(authRequest.getEmail())) {
+            if (userRepository.existsByEmailAndDeletedAtIsNull(authRequest.getEmail())) {
                 User userExists = userRepository.findByEmail(authRequest.getEmail());
                 String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(userExists.getId()));
                 authResponse.setRefreshToken(refreshToken);
                 authResponse.setRoleId(userExists.getRole().getId());
+                String accessToken = jwtUtil.generateAccessToken(userExists.getEmail(), userExists.getRole().getName());
+                authResponse.setAccessToken(accessToken);
+            } else {
+                throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
             }
             authResponse.setExpireIn(jwtExpirationMs);
             return authResponse;
         } catch (BadCredentialsException e) {
             throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DEVICE_PATH.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             e.printStackTrace();
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);

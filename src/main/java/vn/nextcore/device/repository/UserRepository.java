@@ -17,11 +17,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findUserByIdAndDeletedAtIsNull(Long id);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmailAndDeletedAtIsNull(String email);
 
     List<User> findAllByDeletedAtIsNull(Sort sort);
 
-    @Query(value = "SELECT * FROM \"NGUOIDUNG\" WHERE LOWER(unaccent(ten)) LIKE LOWER(unaccent(CONCAT('%', :keyword, '%')))", nativeQuery = true)
+    @Query(value = "SELECT * FROM \"NGUOIDUNG\" WHERE LOWER(unaccent(ten)) LIKE LOWER(unaccent(CONCAT('%', :keyword, '%'))) AND deleted_at is null ", nativeQuery = true)
     List<User> searchByTenIgnoreCaseAndAccent(@Param("keyword") String keyword);
 
     @Transactional

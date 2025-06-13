@@ -175,6 +175,8 @@ public class UserService implements IUserService {
             }
             UserResponse userResponse = ParseUtils.convertUserToUserResponse(user);
             return userResponse;
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -188,9 +190,14 @@ public class UserService implements IUserService {
             if (user == null) {
                 throw new HandlerException(ErrorCodeEnum.ER138.getCode(), ErrorCodeEnum.ER138.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
+            if (user.getDevicesUsing() != null || !user.getDevicesUsing().isEmpty()) {
+                throw new HandlerException(ErrorCodeEnum.ER139.getCode(), ErrorCodeEnum.ER139.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
             user.setDeletedAt(new Date());
             userRepository.save(user);
             return new UserResponse(user.getId());
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -208,6 +215,8 @@ public class UserService implements IUserService {
                 }
             }
             return userResponseList;
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

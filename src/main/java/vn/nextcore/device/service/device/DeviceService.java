@@ -17,6 +17,7 @@ import vn.nextcore.device.dto.resp.ListDeviceResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
+import vn.nextcore.device.enums.Status;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.*;
 import vn.nextcore.device.security.jwt.JwtUtil;
@@ -215,7 +216,7 @@ public class DeviceService implements IDeviceService {
     @Transactional(rollbackFor = {JsonProcessingException.class, IOException.class, Exception.class, HandlerException.class})
     public DeviceResponse updateDevice(String id, DeviceRequest deviceRequest, String specificationJson, MultipartFile[] images, String imagesDelete, String specificationDelete) {
         DeviceResponse deviceResponse = new DeviceResponse();
-        Set<Long> imagesRequestDelete = new HashSet<>();
+        Set<Long> imagesRequestDelete = new LinkedHashSet<>();
         try {
             // validate deviceId
             HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER058);
@@ -223,6 +224,10 @@ public class DeviceService implements IDeviceService {
             Device deviceExists = deviceRepository.findDeviceByIdAndDeletedAtIsNull(Long.valueOf(id));
             if (deviceExists == null) {
                 throw new HandlerException(ErrorCodeEnum.ER057.getCode(), ErrorCodeEnum.ER057.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
+            }
+
+            if (!Status.DEVICE_STOCK.getStatus().equals(deviceExists.getStatus())) {
+                throw new HandlerException(ErrorCodeEnum.ER145.getCode(), ErrorCodeEnum.ER145.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
             }
 
             // set info normal of device
@@ -287,7 +292,22 @@ public class DeviceService implements IDeviceService {
         Set<SpecificationRequest> specificationRequestSet = JsonUtils.parseJsonToSet(specificationJson, new TypeReference<Set<SpecificationRequest>>() {
         }, ErrorCodeEnum.ER062);
         Set<Specification> specificationsAdd = addInfoSpecification(specificationRequestSet);
-        specificationsAdd.forEach(device::addSpecification);
+
+        for (Specification spec : specificationsAdd) {
+            if (!checkSpecificationExistsInDevice(device, spec.getId())) {
+                device.getSpecifications().add(spec);
+            }
+        }
+//        specificationsAdd.forEach(device::addSpecification);
+    }
+
+    private boolean checkSpecificationExistsInDevice(Device device, Long specificationId) {
+        if (device == null || device.getSpecifications().isEmpty() || specificationId == null) {
+            return false;
+        } else {
+            return device.getSpecifications().stream()
+                    .anyMatch(spec -> specificationId.equals(spec.getId()));
+        }
     }
 
     private void deleteSpecifications(String specificationDelete, Device device) throws JsonProcessingException {
@@ -466,7 +486,7 @@ public class DeviceService implements IDeviceService {
 
     // handle save files image
     private Set<Image> processImages(MultipartFile[] images, Device device) throws IOException {
-        Set<Image> imageSet = new HashSet<>();
+        Set<Image> imageSet = new LinkedHashSet<>();
 
         for (MultipartFile image : images) {
             // upload image

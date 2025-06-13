@@ -36,9 +36,10 @@ public class JwtUtil {
     @Autowired
     private UserRepository userRepository;
 
-    public String generateAccessToken(String email) {
+    public String generateAccessToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
@@ -72,7 +73,7 @@ public class JwtUtil {
 
             if (userRepository.existsById(Long.valueOf(id))) {
                 User user = userRepository.findUserByIdAndDeletedAtIsNull(Long.valueOf(id));
-                return generateAccessToken(user.getEmail());
+                return generateAccessToken(user.getEmail(), user.getRole().getName());
             } else {
                 throw new HandlerException(ErrorCodeEnum.ER100.getCode(), ErrorCodeEnum.ER100.getMessage(), PathEnum.REFRESH_TOKEN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
             }

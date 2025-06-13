@@ -10,14 +10,14 @@ import java.util.List;
 public interface IRequestCriteriaRepository {
     ListRequestResponse listRequestsCriteria(
             String title,
-            String createdDate,
-            String approvedDate,
             String status,
+            String exceptStatus,
             String type,
             Long createdBy,
             String sortCreatedDate,
             String sortApprovedDate,
             Integer offset,
-            Integer limit
+            Integer limit,
+            List<FilterRequest> dateFilters
     );
 }

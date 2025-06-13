@@ -7,6 +7,8 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
 public class SpecificationRequest {
+    private Long id;
+
     @NotBlank(message = "ER036")
     private String name;
 

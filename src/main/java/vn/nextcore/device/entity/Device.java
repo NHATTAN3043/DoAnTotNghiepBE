@@ -7,11 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
+import java.util.*;
 
 @Entity
 @Getter
@@ -120,7 +116,7 @@ public class Device {
 
     //relationship of images
     @OneToMany(mappedBy = DEVICE, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Image> images = new HashSet<>();
+    private Set<Image> images = new LinkedHashSet<>();
 
     public void addSpecification(Specification specification) {
         if (specification != null) {

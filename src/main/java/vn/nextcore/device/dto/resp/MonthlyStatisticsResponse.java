@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Schema
 public class MonthlyStatisticsResponse {
-    private Integer moth;
+    private Integer month;
 
     private Integer allocateQuantity;
 

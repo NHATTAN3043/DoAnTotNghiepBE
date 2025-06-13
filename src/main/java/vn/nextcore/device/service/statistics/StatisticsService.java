@@ -86,7 +86,7 @@ public class StatisticsService implements IStatisticsService {
                 Integer mainQ = noteDeviceRepository.countDeviceByActionAndMonthAndYear(Status.ACTION_MAINTENANCE.getStatus(), i, year);
 
                 MonthlyStatisticsResponse month = new MonthlyStatisticsResponse();
-                month.setMoth(i);
+                month.setMonth(i);
                 month.setAllocateQuantity(allocateQ);
                 month.setRetrieveQuantity(retrieveQ);
                 month.setMaintenanceQuantity(mainQ);

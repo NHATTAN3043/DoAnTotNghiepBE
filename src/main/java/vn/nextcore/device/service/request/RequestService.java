@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.dto.req.ApproveRequest;
 import vn.nextcore.device.dto.req.DataRequest;
+import vn.nextcore.device.dto.req.FilterRequest;
 import vn.nextcore.device.dto.req.ReqTypesRequest;
 import vn.nextcore.device.dto.resp.ListRequestResponse;
 import vn.nextcore.device.dto.resp.ReqGroupResponse;
@@ -19,6 +20,8 @@ import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.*;
 import vn.nextcore.device.repository.criteria.request.IRequestCriteriaRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
+import vn.nextcore.device.util.CheckerUtils;
+import vn.nextcore.device.util.JsonUtils;
 import vn.nextcore.device.util.ParseUtils;
 
 import java.util.*;
@@ -46,6 +49,13 @@ public class RequestService implements IRequestService {
     @Autowired
     private NoteDeviceRepository noteDeviceRepository;
 
+    private String BACK_OFFICE = "Back Office";
+
+    private String EMPLOYEE = "Employee";
+
+    private String MANAGER = "Manager";
+
+    private List<String> allowedFields = Arrays.asList("approvedDate", "createdDate");
 
     @Override
     @Transactional
@@ -93,15 +103,34 @@ public class RequestService implements IRequestService {
     }
 
     @Override
-    public ListRequestResponse getRequests(String title, String createdDate, String approvedDate, String status, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit) {
+    public ListRequestResponse getRequests(HttpServletRequest request, Boolean isGetMyRequest, String title, String status, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit, String dateFilter) {
+        ListRequestResponse result = new ListRequestResponse();
         try {
             if (createdBy != null) {
                 if (!userRepository.existsById(createdBy))  {
                     throw new HandlerException(ErrorCodeEnum.ER025.getCode(), ErrorCodeEnum.ER025.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
                 }
             }
+            List<FilterRequest> filters = validateDateFilters(dateFilter);
 
-            ListRequestResponse result = requestCriteriaRepository.listRequestsCriteria(title, createdDate, approvedDate, status, type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit);
+            User user = jwtUtil.extraUserFromRequest(request);
+            if (isGetMyRequest) {
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                return result;
+            }
+
+            if (EMPLOYEE.equals(user.getRole().getName())) {
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                return result;
+            }
+            if (MANAGER.equals(user.getRole().getName())) {
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                return result;
+            }
+            if (BACK_OFFICE.equals(user.getRole().getName())) {
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, Status.REQUEST_PENDING.getStatus(), type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                return result;
+            }
             return result;
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
@@ -153,6 +182,22 @@ public class RequestService implements IRequestService {
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private List<FilterRequest> validateDateFilters(String filterEncode) {
+        if (filterEncode == null || filterEncode.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // decode filters json
+        List<FilterRequest> filters = JsonUtils.decodeAndList(filterEncode);
+
+        for (FilterRequest filter : filters) {
+            CheckerUtils.validateFilterField(filter, allowedFields);
+            CheckerUtils.validateDateFilter(filter);
+        }
+
+        return filters;
     }
 
 }

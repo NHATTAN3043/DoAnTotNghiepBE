@@ -5,8 +5,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,13 +35,14 @@ public class SecurityConfig {
         try {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
+            .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
                             "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**", "/ws/**").permitAll()
-                    .requestMatchers("/api/request/**", "/api/group/**", "/api/project").hasAnyAuthority("Employee", "Back Office", "Manager")
+                    .requestMatchers("/api/request/**", "/api/group/**", "/api/project", "/api/user/getMe").hasAnyAuthority("Employee", "Back Office", "Manager")
                     .requestMatchers("/api/device/**", "/api/delivery/**", "/api/specification/**", "/api/provider/**", "/api/statistics/**").hasAnyAuthority("Back Office", "Manager")
                     .requestMatchers("/api/user/**").hasAuthority("Manager")
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling
