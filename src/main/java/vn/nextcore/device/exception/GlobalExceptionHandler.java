@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 
 import java.util.HashMap;
@@ -200,4 +199,5 @@ public class GlobalExceptionHandler {
         errorResponse.setPath(path);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
 }

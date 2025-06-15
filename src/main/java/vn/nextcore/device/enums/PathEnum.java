@@ -5,6 +5,7 @@ public enum PathEnum {
     DEVICE_PATH("/api/device"),
     SPECIFICATION_PATH("/api/specification"),
     GROUP_PATH("/api/group"),
+    PROVIDER_PATH("/api/provider"),
     VERIFY_EMAIL_PATH("/api/forgotPassword/verifyMail"),
     REFRESH_TOKEN_PATH("/auth/refreshtoken"),
     DELIVERY_PATH("/auth/delivery"),

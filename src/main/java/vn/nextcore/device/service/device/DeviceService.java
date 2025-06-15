@@ -169,7 +169,7 @@ public class DeviceService implements IDeviceService {
             newDevice.setCreatedBy(user);
 
             // add provider
-            Provider provider = providerRepository.findProviderById(Long.valueOf(deviceRequest.getProviderId()));
+            Provider provider = providerRepository.findProviderByIdAndDeletedAtIsNull(Long.valueOf(deviceRequest.getProviderId()));
             newDevice.setProvider(provider);
 
             // add set specification
@@ -187,8 +187,8 @@ public class DeviceService implements IDeviceService {
                 // check files image
                 CheckFilesValid(images, images.length);
 
-                Set<Image> imageSet = processImages(images, newDevice);
-                newDevice.setImages(imageSet);
+                List<Image> ListImages = processImages(images, newDevice);
+                newDevice.setImages(ListImages);
             }
 
             newDevice.setStatus(STATUS_STOCK);
@@ -234,7 +234,7 @@ public class DeviceService implements IDeviceService {
             setInfoDevice(deviceRequest, deviceExists);
             updateGroupInfo(deviceRequest.getGroupId(), deviceExists);
 
-            Provider newProvider = providerRepository.findProviderById(Long.valueOf(deviceRequest.getProviderId()));
+            Provider newProvider = providerRepository.findProviderByIdAndDeletedAtIsNull(Long.valueOf(deviceRequest.getProviderId()));
             deviceExists.setProvider(newProvider);
 
             // handle specification delete
@@ -258,8 +258,8 @@ public class DeviceService implements IDeviceService {
                 int quantityImagesOfDevice = imageRepository.countByDeviceId(Long.valueOf(id));
                 CheckFilesValid(images, quantityImagesOfDevice + images.length - imagesRequestDelete.size());
 
-                Set<Image> imageSet = processImages(images, deviceExists);
-                deviceExists.setImages(imageSet);
+                List<Image> listImages = processImages(images, deviceExists);
+                deviceExists.setImages(listImages);
             }
 
             deviceExists.setUpdatedAt(new Date());
@@ -485,8 +485,8 @@ public class DeviceService implements IDeviceService {
     }
 
     // handle save files image
-    private Set<Image> processImages(MultipartFile[] images, Device device) throws IOException {
-        Set<Image> imageSet = new LinkedHashSet<>();
+    private List<Image> processImages(MultipartFile[] images, Device device) throws IOException {
+        List<Image> imageSet = new ArrayList<>();
 
         for (MultipartFile image : images) {
             // upload image

@@ -65,7 +65,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setRequest(requestExists);
 
             if (request.getProviderId() != null && MAINTENANCE.equals(request.getTypeNote())) {
-                Provider provider = providerRepository.findProviderById(request.getProviderId());
+                Provider provider = providerRepository.findProviderByIdAndDeletedAtIsNull(request.getProviderId());
                 if (provider == null) {
                     throw new HandlerException(ErrorCodeEnum.ER126.getCode(), ErrorCodeEnum.ER126.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
                 }
@@ -77,7 +77,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setCreatedBy(user);
 
             if (request.getProviderId() != null) {
-                Provider provider = providerRepository.findProviderById(request.getProviderId());
+                Provider provider = providerRepository.findProviderByIdAndDeletedAtIsNull(request.getProviderId());
                 deliveryNote.setProvider(provider);
             }
 

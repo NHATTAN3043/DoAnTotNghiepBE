@@ -116,7 +116,7 @@ public class Device {
 
     //relationship of images
     @OneToMany(mappedBy = DEVICE, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Image> images = new LinkedHashSet<>();
+    private List<Image> images = new ArrayList<>();
 
     public void addSpecification(Specification specification) {
         if (specification != null) {
