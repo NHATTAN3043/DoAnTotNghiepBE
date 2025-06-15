@@ -32,6 +32,9 @@ public class Request {
     public static final String REQUEST = "request";
     public static final String USER_ID = "maNguoiDung";
     public static final String REQUEST_TYPE = "loaiYeuCau";
+    public static final String UPDATED_AT = "updated_at";
+    public static final String CREATED_AT = "created_at";
+    public static final String DELETED_AT = "deleted_at";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +58,15 @@ public class Request {
 
     @Column(name = APPROVED_DATE)
     private Date approvedDate;
+
+    @Column(name = UPDATED_AT)
+    private Date updatedAt;
+
+    @Column(name = CREATED_AT)
+    private Date createdAt;
+
+    @Column(name = DELETED_AT)
+    private Date deletedAt;
 
     // relationship of user
     @ManyToOne

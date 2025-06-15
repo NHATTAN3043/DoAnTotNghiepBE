@@ -30,12 +30,9 @@ public class ParseUtils {
             if (METHOD_LIST.equals(method)) {
                 deviceResponse.setGroupName(device.getGroup().getName());
                 deviceResponse.setProviderName(device.getProvider().getName());
-                String fistImg = null;
-                Iterator<Image> iterator = device.getImages().iterator();
-                if (iterator.hasNext()) {
-                    fistImg = iterator.next().getName();
+                if (!device.getImages().isEmpty()) {
+                    deviceResponse.setImage(device.getImages().get(0).getName());
                 }
-                deviceResponse.setImage(fistImg);
             }
 
             if (METHOD_DETAILS.equals(method)) {
@@ -49,7 +46,7 @@ public class ParseUtils {
 
                 deviceResponse.setGroup(convertGroupToGroupResponse(device.getGroup()));
 
-                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider()));
+                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider(), false));
 
                 List<ImageResponse> images = new ArrayList<>();
                 if (device.getImages() != null) {
@@ -151,7 +148,7 @@ public class ParseUtils {
                         deliveryNoteResponse.setCreatedBy(convertUserToUserResponse(deliveryNote.getCreatedBy()));
 
                         if (deliveryNote.getProvider() != null) {
-                            deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider()));
+                            deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider(), false));
                         }
                         List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
                         for (NoteDevice noteDevice : deliveryNote.getNoteDevices()) {
@@ -164,7 +161,7 @@ public class ParseUtils {
                             deviceResponse.setDeviceId(noteDevice.getDevice().getId());
                             deviceResponse.setName(noteDevice.getDevice().getName());
                             deviceResponse.setGroupName(noteDevice.getDevice().getGroup().getName());
-                            Set<Image> images = noteDevice.getDevice().getImages();
+                            List<Image> images = noteDevice.getDevice().getImages();
                             if (images != null && !images.isEmpty()) {
                                 Image firstImage = images.iterator().next();
                                 deviceResponse.setImage(firstImage.getName());
@@ -207,7 +204,7 @@ public class ParseUtils {
                 deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
                 deliveryNoteResponse.setCreatedBy(convertUserToUserResponse(deliveryNote.getCreatedBy()));
                 deliveryNoteResponse.setAssignee(convertUserToUserResponse(deliveryNote.getRequest().getCreatedBy()));
-                deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider()));
+                deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider(), false));
             }
 
             return deliveryNoteResponse;
@@ -286,7 +283,7 @@ public class ParseUtils {
         }
     }
 
-    public static ProviderResponse convertProviderToProviderResponse (Provider provider) {
+    public static ProviderResponse convertProviderToProviderResponse (Provider provider, Boolean isSelectList) {
         try {
             ProviderResponse providerResponse = new ProviderResponse();
             if (provider != null) {
@@ -294,6 +291,12 @@ public class ParseUtils {
                 providerResponse.setName(provider.getName());
                 providerResponse.setAddress(provider.getAddress());
                 providerResponse.setPhoneNumber(provider.getPhoneNumber());
+                if (!provider.getDevices().isEmpty() && isSelectList == false) {
+                    for (Device device : provider.getDevices()) {
+                        DeviceResponse deviceResponse = convertDeviceToDeviceRes(device, METHOD_LIST);
+                        providerResponse.getDevices().add(deviceResponse);
+                    }
+                }
             }
 
             return providerResponse;

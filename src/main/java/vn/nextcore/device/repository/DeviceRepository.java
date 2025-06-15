@@ -15,9 +15,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     Device findDeviceById(Long id);
     Device findDeviceByIdAndDeletedAtIsNull(Long id);
-
-    List<Device> findDeviceByDateMaintenanceBetween(Date start, Date end);
-
     Integer countDeviceByDeletedAtIsNull();
 
     Integer countDeviceByStatusAndDeletedAtIsNull(String status);
@@ -28,4 +25,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
             "WHERE d.id = :deviceId AND s.id = :specificationId")
     boolean existsByDeviceIdAndSpecificationId(@Param("deviceId") Long deviceId,
                                                @Param("specificationId") Long specificationId);
+
+    boolean existsDeviceByProviderIdAndDeletedAtIsNull(Long providerId);
 }

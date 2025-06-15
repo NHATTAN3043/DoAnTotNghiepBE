@@ -72,6 +72,8 @@ public enum ErrorCodeEnum {
     ER143("ER143", "date param invalid format dd/MM/yyyy"),
     ER144("ER144", "date param invalid"),
     ER145("ER145", "device can't update because not in stock"),
+    ER146("ER146", "providerId must be positive integer"),
+    ER147("ER147", "provider contain devices"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

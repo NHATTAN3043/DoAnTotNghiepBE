@@ -58,12 +58,12 @@ public class AuthService implements IAuthService {
                 String accessToken = jwtUtil.generateAccessToken(userExists.getEmail(), userExists.getRole().getName());
                 authResponse.setAccessToken(accessToken);
             } else {
-                throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
+                throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
             authResponse.setExpireIn(jwtExpirationMs);
             return authResponse;
         } catch (BadCredentialsException e) {
-            throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
+            throw new HandlerException(ErrorCodeEnum.ER007.getCode(), ErrorCodeEnum.ER007.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.BAD_REQUEST);
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DEVICE_PATH.getPath(), handlerException.getStatus());
         } catch (Exception e) {
