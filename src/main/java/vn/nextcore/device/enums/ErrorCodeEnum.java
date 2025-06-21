@@ -74,6 +74,7 @@ public enum ErrorCodeEnum {
     ER145("ER145", "device can't update because not in stock"),
     ER146("ER146", "providerId must be positive integer"),
     ER147("ER147", "provider contain devices"),
+    ER148("ER148", "user not exists"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

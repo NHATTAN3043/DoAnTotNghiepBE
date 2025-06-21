@@ -13,4 +13,6 @@ public class AuthResponse {
     private Long expireIn;
 
     private Long roleId;
+
+    private Long userId;
 }

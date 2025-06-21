@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-    @Table(name = "YEUCAU")
+@Table(name = "YEUCAU")
 public class Request {
     public static final String ID = "maYeuCau";
     public static final String TITLE = "tieuDe";

@@ -20,6 +20,7 @@ import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.*;
 import vn.nextcore.device.repository.criteria.request.IRequestCriteriaRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
+import vn.nextcore.device.service.notification.INotificationService;
 import vn.nextcore.device.util.CheckerUtils;
 import vn.nextcore.device.util.JsonUtils;
 import vn.nextcore.device.util.ParseUtils;
@@ -48,6 +49,9 @@ public class RequestService implements IRequestService {
 
     @Autowired
     private NoteDeviceRepository noteDeviceRepository;
+
+    @Autowired
+    private INotificationService notificationService;
 
     private String BACK_OFFICE = "Back Office";
 
@@ -92,6 +96,18 @@ public class RequestService implements IRequestService {
             newRequest.setCreatedDate(new Date());
             newRequest.setStatus(Status.REQUEST_PENDING.getStatus());
             newRequest.setRequestType(dataRequest.getRequestType());
+
+            List<User> listAdmin = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("3"));
+            List<String> tokens = new ArrayList<>();
+            for (User admin : listAdmin) {
+                List<DeviceTokens> adminTokens = admin.getUserDeviceTokens();
+
+                for (DeviceTokens tokenRecord : adminTokens) {
+                    tokens.add(tokenRecord.getToken());
+                }
+            }
+            String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu mới", user.getUserName() + " đã gửi một yêu cầu", "addRequest", "new");
+
             requestRepository.save(newRequest);
             return new ReqResponse(newRequest.getId());
         } catch (HandlerException handlerException) {

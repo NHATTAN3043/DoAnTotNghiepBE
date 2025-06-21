@@ -55,6 +55,7 @@ public class AuthService implements IAuthService {
                 String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(userExists.getId()));
                 authResponse.setRefreshToken(refreshToken);
                 authResponse.setRoleId(userExists.getRole().getId());
+                authResponse.setUserId(userExists.getId());
                 String accessToken = jwtUtil.generateAccessToken(userExists.getEmail(), userExists.getRole().getName());
                 authResponse.setAccessToken(accessToken);
             } else {

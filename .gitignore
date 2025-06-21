@@ -63,3 +63,5 @@ logs/
 .sts4-cache
 
 uploadImgDevice/
+
+src/main/resources/*.json
