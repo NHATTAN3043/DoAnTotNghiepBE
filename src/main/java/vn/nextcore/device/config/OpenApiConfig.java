@@ -130,4 +130,12 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/statistics/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi notificationApi() {
+        return GroupedOpenApi.builder()
+                .group("api-notification")
+                .pathsToMatch("/api/notification/**")
+                .build();
+    }
 }

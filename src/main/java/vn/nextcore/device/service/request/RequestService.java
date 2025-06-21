@@ -97,18 +97,27 @@ public class RequestService implements IRequestService {
             newRequest.setStatus(Status.REQUEST_PENDING.getStatus());
             newRequest.setRequestType(dataRequest.getRequestType());
 
+            requestRepository.save(newRequest);
+
             List<User> listAdmin = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("3"));
             List<String> tokens = new ArrayList<>();
             for (User admin : listAdmin) {
                 List<DeviceTokens> adminTokens = admin.getUserDeviceTokens();
+                Notifications notifications = new Notifications();
+                notifications.setContent(user.getUserName() + " đã gửi một yêu cầu");
+                notifications.setTitle("Yêu cầu mới");
+                notifications.setCreatedBy(user);
+                notifications.setUser(admin);
+                notifications.setCreatedAt(new Date());
+                notifications.setPath("/manager/request/" + newRequest.getId());
 
+                admin.getUserNotifications().add(notifications);
+                userRepository.save(admin);
                 for (DeviceTokens tokenRecord : adminTokens) {
                     tokens.add(tokenRecord.getToken());
                 }
             }
             String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu mới", user.getUserName() + " đã gửi một yêu cầu", "addRequest", "new");
-
-            requestRepository.save(newRequest);
             return new ReqResponse(newRequest.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());

@@ -75,6 +75,8 @@ public enum ErrorCodeEnum {
     ER146("ER146", "providerId must be positive integer"),
     ER147("ER147", "provider contain devices"),
     ER148("ER148", "user not exists"),
+    ER149("ER149", "id not valid"),
+    ER150("ER150", "notification not found"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

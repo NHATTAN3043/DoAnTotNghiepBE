@@ -213,6 +213,27 @@ public class ParseUtils {
         }
     }
 
+    public static NotificationResponse convertNotificationToNotificationResponse(Notifications notifications) {
+        try {
+            NotificationResponse notificationResponse = new NotificationResponse();
+
+            if (notifications != null) {
+                notificationResponse.setId(notifications.getId());
+                notificationResponse.setTitle(notifications.getTitle());
+                notificationResponse.setContent(notifications.getContent());
+                notificationResponse.setRead(notifications.getRead());
+                notificationResponse.setPath(notifications.getPath());
+                if(notifications.getCreatedAt() != null) {
+                    notificationResponse.setCreatedAt(timeFormat.format(notifications.getCreatedAt()));
+                }
+                notificationResponse.setCreatedBy(convertUserToUserResponse(notifications.getUser()));
+            }
+            return notificationResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public static UserResponse convertUserToUserResponse(User user) {
         try {
             UserResponse userResponse = new UserResponse();

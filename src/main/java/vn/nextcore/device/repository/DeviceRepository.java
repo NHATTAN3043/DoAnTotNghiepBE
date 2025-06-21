@@ -27,4 +27,7 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
                                                @Param("specificationId") Long specificationId);
 
     boolean existsDeviceByProviderIdAndDeletedAtIsNull(Long providerId);
+
+    @Query("SELECT d FROM Device d WHERE d.dateMaintenance BETWEEN :today AND :next7Days")
+    List<Device> findDevicesWithMaintenanceExpiringWithin7Days(Date today, Date next7Days);
 }
