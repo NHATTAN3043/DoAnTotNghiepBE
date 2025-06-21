@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllByDeletedAtIsNull(Sort sort);
 
+    List<User> findAllByRoleIdAndDeletedAtIsNull(Long roleId);
+
     @Query(value = "SELECT * FROM \"NGUOIDUNG\" WHERE LOWER(unaccent(ten)) LIKE LOWER(unaccent(CONCAT('%', :keyword, '%'))) AND deleted_at is null ", nativeQuery = true)
     List<User> searchByTenIgnoreCaseAndAccent(@Param("keyword") String keyword);
 

@@ -115,4 +115,18 @@ public class User {
     //relationship of forgot_password
     @OneToOne(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ForgotPassword forgotPassword;
+
+    // relationship of notifications
+    @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> CreatedByOfNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> userNotifications = new ArrayList<>();
+
+    // relationship of deviceTokens
+    @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DeviceTokens> CreatedByOfDeviceTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DeviceTokens> userDeviceTokens = new ArrayList<>();
 }
