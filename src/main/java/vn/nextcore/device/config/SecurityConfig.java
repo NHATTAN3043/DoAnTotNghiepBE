@@ -39,9 +39,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
                             "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**", "/ws/**").permitAll()
-                    .requestMatchers("/api/request/**", "/api/group/**", "/api/project", "/api/user/getMe").hasAnyAuthority("Employee", "Back Office", "Manager")
+                    .requestMatchers("/api/request/**", "/api/group/**", "/api/project", "/api/user/getMe", "/api/user/getDepartment", "/api/user/update-profile/**", "/api/user/change-password").hasAnyAuthority("Employee", "Back Office", "Manager")
                     .requestMatchers("/api/device/**", "/api/delivery/**", "/api/specification/**", "/api/provider/**", "/api/statistics/**").hasAnyAuthority("Back Office", "Manager")
-                    .requestMatchers("/api/user/**").hasAuthority("Manager")
+                    .requestMatchers("/api/user/**", "/api/department/**").hasAuthority("Manager")
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             )

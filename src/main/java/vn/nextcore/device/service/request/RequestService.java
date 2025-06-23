@@ -61,6 +61,8 @@ public class RequestService implements IRequestService {
 
     private List<String> allowedFields = Arrays.asList("approvedDate", "createdDate");
 
+    private Long managerId = 3L;
+
     @Override
     @Transactional
     public ReqResponse createRequest(HttpServletRequest request, DataRequest dataRequest) {
@@ -71,6 +73,7 @@ public class RequestService implements IRequestService {
             newRequest.setCreatedBy(user);
             newRequest.setTitle(dataRequest.getTitle());
             newRequest.setDescription(dataRequest.getDescriptions());
+
             if (dataRequest.getProjectId() != null) {
                 Project project = projectRepository.findProjectById(dataRequest.getProjectId());
                 if (project == null) {
@@ -94,7 +97,11 @@ public class RequestService implements IRequestService {
             }
             newRequest.setRequestGroups(requestGroups);
             newRequest.setCreatedDate(new Date());
-            newRequest.setStatus(Status.REQUEST_PENDING.getStatus());
+            if (managerId.equals(user.getRole().getId())) {
+                newRequest.setStatus(Status.REQUEST_APPROVED.getStatus());
+            } else {
+                newRequest.setStatus(Status.REQUEST_PENDING.getStatus());
+            }
             newRequest.setRequestType(dataRequest.getRequestType());
 
             requestRepository.save(newRequest);

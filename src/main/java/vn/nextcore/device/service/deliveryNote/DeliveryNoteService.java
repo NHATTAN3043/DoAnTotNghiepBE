@@ -89,6 +89,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
 
                 if (ALLOCATE.equals(request.getTypeNote())) {
                     device.setUsingBy(requestExists.getCreatedBy());
+                    device.setStatus(ACTIVE);
                 }
 
                 if (RETRIEVE.equals(request.getTypeNote())) {

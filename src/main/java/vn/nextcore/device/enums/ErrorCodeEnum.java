@@ -77,6 +77,10 @@ public enum ErrorCodeEnum {
     ER148("ER148", "user not exists"),
     ER149("ER149", "id not valid"),
     ER150("ER150", "notification not found"),
+    ER151("ER151", "groupId not found"),
+    ER152("ER152", "old password not match"),
+    ER153("ER153", "departmentId not found"),
+    ER154("ER154", "department contain user"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

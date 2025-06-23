@@ -1,6 +1,7 @@
 package vn.nextcore.device.service.user;
 
 import jakarta.servlet.http.HttpServletRequest;
+import vn.nextcore.device.dto.req.ChangePasswordRequest;
 import vn.nextcore.device.dto.req.DepartmentRequest;
 import vn.nextcore.device.dto.req.UserRequest;
 import vn.nextcore.device.dto.resp.DepartmentResponse;
@@ -27,4 +28,6 @@ public interface IUserService {
     List<DepartmentResponse> getDepartments();
 
     DepartmentResponse createDepartment(DepartmentRequest request);
+
+    void changePassword(HttpServletRequest request, ChangePasswordRequest req);
 }

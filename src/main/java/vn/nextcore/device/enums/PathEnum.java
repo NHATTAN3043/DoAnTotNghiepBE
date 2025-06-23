@@ -11,6 +11,7 @@ public enum PathEnum {
     DELIVERY_PATH("/auth/delivery"),
     USER_PATH("/api/user"),
     STATISTICS_PATH("/api/statistics"),
+    DEPARTMENT_PATH("/api/department"),
     REQUEST_PATH("/api/request");
 
 

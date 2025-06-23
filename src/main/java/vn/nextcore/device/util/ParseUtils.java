@@ -46,7 +46,7 @@ public class ParseUtils {
 
                 deviceResponse.setGroup(convertGroupToGroupResponse(device.getGroup()));
 
-                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider(), false));
+                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider(), true));
 
                 List<ImageResponse> images = new ArrayList<>();
                 if (device.getImages() != null) {
@@ -280,6 +280,27 @@ public class ParseUtils {
             }
 
             return groupResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static DepartmentResponse convertDepartmentToDepartmentResponse(Department department) {
+        try {
+            DepartmentResponse departmentResponse = new DepartmentResponse();
+
+            if (department != null) {
+                departmentResponse.setId(department.getId());
+                departmentResponse.setName(department.getName());
+                if (department.getUsers() != null) {
+                    for (User user : department.getUsers()) {
+                        UserResponse userResponse = convertUserToUserResponse(user);
+                        departmentResponse.getUsers().add(userResponse);
+                    }
+                }
+            }
+
+            return departmentResponse;
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

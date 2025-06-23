@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.nextcore.device.dto.req.ChangePasswordRequest;
 import vn.nextcore.device.dto.req.DepartmentRequest;
 import vn.nextcore.device.dto.req.UserRequest;
 import vn.nextcore.device.dto.resp.DepartmentResponse;
@@ -55,20 +56,9 @@ public class UserService implements IUserService {
 
     @Override
     public UserResponse getMe(HttpServletRequest request) {
-        UserResponse userResponse = new UserResponse();
         try {
             User user = jwtUtil.extraUserFromRequest(request);
-            userResponse.setId(user.getId());
-            userResponse.setEmail(user.getEmail());
-            userResponse.setAddress(user.getAddress());
-            userResponse.setGender(user.getGender());
-            userResponse.setUserName(user.getUserName());
-            userResponse.setAvatarUrl(user.getAvatarUrl());
-            userResponse.setPhoneNumber(user.getPhoneNumber());
-            if (user.getDateOfBirth() != null) {
-                userResponse.setDateOfBirth(dateFormat.format(user.getDateOfBirth()));
-            }
-            userResponse.setRole(new RoleResponse(user.getRole().getId(), user.getRole().getName()));
+            UserResponse userResponse = ParseUtils.convertUserToUserResponse(user);
             return userResponse;
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -264,6 +254,24 @@ public class UserService implements IUserService {
             departmentRepository.save(newDepartment);
 
             return new DepartmentResponse(newDepartment.getId());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public void changePassword(HttpServletRequest request, ChangePasswordRequest req) {
+        try {
+            User user = jwtUtil.extraUserFromRequest(request);
+            boolean isMatch = passwordEncoder.matches(req.getPassword(), user.getPassword());
+            if (!isMatch) {
+                throw new HandlerException(ErrorCodeEnum.ER152.getCode(), ErrorCodeEnum.ER152.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+
+            user.setPassword(passwordEncoder.encode(req.getRepeatPassword()));
+            userRepository.save(user);
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

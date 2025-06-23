@@ -100,7 +100,7 @@ public class ProviderService implements IProviderService {
 
             return ParseUtils.convertProviderToProviderResponse(provider, true);
         } catch (HandlerException handlerException) {
-            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DEVICE_PATH.getPath(), handlerException.getStatus());
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.PROVIDER_PATH.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.PROVIDER_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
