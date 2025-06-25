@@ -2,6 +2,7 @@ package vn.nextcore.device.service.group;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.dto.req.GroupRequest;
 import vn.nextcore.device.dto.resp.DeviceResponse;
 import vn.nextcore.device.dto.resp.GroupResponse;
@@ -29,6 +30,7 @@ public class GroupService implements IGroupService {
     private DeviceRepository deviceRepository;
 
     @Override
+    @Transactional
     public GroupResponse createGroupDevice(GroupRequest req) {
         try {
             return handleInfoGroup(req, new Group());
@@ -40,6 +42,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
+    @Transactional
     public GroupResponse updateGroupDevice(String id, GroupRequest req) {
         if (!groupRepository.existsById(Long.valueOf(id))) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage());
@@ -84,6 +87,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
+    @Transactional
     public void deleteGroupById(String id) {
         try {
             HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);

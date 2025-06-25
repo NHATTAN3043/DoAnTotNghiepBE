@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
 public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm - dd/MM/yyyy");
@@ -63,7 +64,7 @@ public class ParseUtils {
 
                 List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
 
-                for (NoteDevice noteDevice: sortedNoteDevices) {
+                for (NoteDevice noteDevice : sortedNoteDevices) {
                     NoteDeviceResponse noteDeviceResponse = new NoteDeviceResponse();
                     noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
                     noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
@@ -183,7 +184,15 @@ public class ParseUtils {
                     }
                     reqResponse.setDeliveryNoteResponses(deliveryNotes);
                 }
+
+                if (request.getProject() != null) {
+                    ProjectResponse projectResponse = new ProjectResponse();
+                    projectResponse.setId(request.getProject().getId().toString());
+                    projectResponse.setName(request.getProject().getProjectName());
+                    reqResponse.setProject(projectResponse);
+                }
             }
+
 
             return reqResponse;
         } catch (Exception e) {
@@ -223,10 +232,10 @@ public class ParseUtils {
                 notificationResponse.setContent(notifications.getContent());
                 notificationResponse.setRead(notifications.getRead());
                 notificationResponse.setPath(notifications.getPath());
-                if(notifications.getCreatedAt() != null) {
+                if (notifications.getCreatedAt() != null) {
                     notificationResponse.setCreatedAt(timeFormat.format(notifications.getCreatedAt()));
                 }
-                notificationResponse.setCreatedBy(convertUserToUserResponse(notifications.getUser()));
+                notificationResponse.setCreatedBy(convertUserToUserResponse(notifications.getCreatedBy()));
             }
             return notificationResponse;
         } catch (Exception e) {
@@ -261,6 +270,12 @@ public class ParseUtils {
                         userResponse.getDeviceResponseList().add(deviceResponse);
                     }
                 }
+                if (user.getUserProjects() != null) {
+                    for (UserProject project : user.getUserProjects()) {
+                        ProjectResponse projectResponse = convertProjectToProjectResponse(project);
+                        userResponse.getProjects().add(projectResponse);
+                    }
+                 }
             }
 
             return userResponse;
@@ -269,7 +284,23 @@ public class ParseUtils {
         }
     }
 
-    public static GroupResponse convertGroupToGroupResponse (Group group) {
+    public static ProjectResponse convertProjectToProjectResponse(UserProject userProject) {
+        try {
+            ProjectResponse projectResponse = new ProjectResponse();
+            if (userProject != null) {
+                projectResponse.setId(userProject.getProject().getId().toString());
+                projectResponse.setName(userProject.getProject().getProjectName());
+                if (userProject.getDateOfJoin() != null) {
+                    projectResponse.setDateJoin(dateFormat.format(userProject.getDateOfJoin()));
+                }
+            }
+            return projectResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static GroupResponse convertGroupToGroupResponse(Group group) {
         try {
             GroupResponse groupResponse = new GroupResponse();
 
@@ -306,7 +337,7 @@ public class ParseUtils {
         }
     }
 
-    public static GroupResponse convertGroupToGroupResponse (Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity) {
+    public static GroupResponse convertGroupToGroupResponse(Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity) {
         try {
             GroupResponse groupResponse = new GroupResponse();
 
@@ -325,7 +356,7 @@ public class ParseUtils {
         }
     }
 
-    public static ProviderResponse convertProviderToProviderResponse (Provider provider, Boolean isSelectList) {
+    public static ProviderResponse convertProviderToProviderResponse(Provider provider, Boolean isSelectList) {
         try {
             ProviderResponse providerResponse = new ProviderResponse();
             if (provider != null) {

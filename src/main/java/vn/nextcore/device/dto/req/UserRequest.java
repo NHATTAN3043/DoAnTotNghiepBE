@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,4 +39,6 @@ public class UserRequest {
 
     @NotNull(message = "ER137")
     private Long roleId;
+
+    private Set<String> projectIds;
 }

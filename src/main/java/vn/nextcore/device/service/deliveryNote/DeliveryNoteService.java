@@ -18,9 +18,10 @@ import vn.nextcore.device.repository.DeviceRepository;
 import vn.nextcore.device.repository.ProviderRepository;
 import vn.nextcore.device.repository.RequestRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import vn.nextcore.device.service.notification.INotificationService;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DeliveryNoteService implements IDeliveryNoteService {
@@ -37,6 +38,9 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private DeliveryNoteRepository deliveryNoteRepository;
 
     @Autowired
+    private INotificationService notificationService;
+
+    @Autowired
     private JwtUtil jwtUtil;
     private static final String ALLOCATE = "allocate";
     private static final String RETRIEVE = "retrieve";
@@ -45,6 +49,8 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private static final String STOCK = "stock";
     private static final String ACTIVE = "active";
     private static final String GOOD = "good";
+    private String EMPLOYEE_DETAIL_REQUEST_PATH = "/next-device/employee/my-request/";
+
 
     @Override
     @Transactional
@@ -117,6 +123,24 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             }
             deliveryNote.setNoteDevices(noteDevices);
             deliveryNoteRepository.save(deliveryNote);
+            // save notification
+            Notifications notifications = new Notifications();
+            notifications.setTitle("Xử lý yêu cầu");
+            notifications.setContent(user.getUserName() + " đã xử lý yêu cầu của bạn");
+            notifications.setCreatedBy(user);
+            notifications.setUser(deliveryNote.getRequest().getCreatedBy());
+            notifications.setCreatedAt(new Date());
+            notifications.setPath("/");
+
+            List<String> tokens = deliveryNote.getRequest().getCreatedBy()
+                    .getUserDeviceTokens()
+                    .stream()
+                    .map(DeviceTokens::getToken )
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            String batchResponse = notificationService.sendNotification(tokens,
+                    "Xử lý yêu cầu", user.getUserName() + " đã xử lý yêu cầu của bạn",
+                    "addDeliveryNote", "new", EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
 
             return new DeliveryNoteResponse(deliveryNote.getId());
         } catch (HandlerException handlerException) {
@@ -140,7 +164,13 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             }
 
             for (NoteDevice noteDevice : deliveryNote.getNoteDevices()) {
-                noteDevice.getDevice().setStatus(ACTIVE);
+                if (Status.ACTION_RETRIEVE.getStatus().equals(noteDevice.getDeliveryNote().getTypeNote())) {
+                    noteDevice.getDevice().setStatus(STOCK);
+                } else if (Status.ACTION_ALLOCATE.getStatus().equals(noteDevice.getDeliveryNote().getTypeNote())) {
+                    noteDevice.getDevice().setStatus(ACTIVE);
+                } else {
+                    noteDevice.getDevice().setStatus(MAINTENANCE);
+                }
             }
             deliveryNote.setIsConfirm(data.getIsConfirm());
             deliveryNoteRepository.save(deliveryNote);

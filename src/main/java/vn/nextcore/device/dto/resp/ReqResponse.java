@@ -36,6 +36,8 @@ public class ReqResponse {
 
     private List<DeliveryNoteResponse> deliveryNoteResponses;
 
+    private ProjectResponse project;
+
     public ReqResponse(Long requestId) {
         this.requestId = requestId;
     }

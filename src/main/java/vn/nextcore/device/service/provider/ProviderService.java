@@ -3,6 +3,7 @@ package vn.nextcore.device.service.provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.dto.req.ProviderRequest;
 import vn.nextcore.device.dto.resp.ProviderResponse;
 import vn.nextcore.device.entity.Provider;
@@ -49,6 +50,7 @@ public class ProviderService implements IProviderService {
     }
 
     @Override
+    @Transactional
     public ProviderResponse createProvider(ProviderRequest req) {
         try {
             Provider provider = new Provider();
@@ -66,6 +68,7 @@ public class ProviderService implements IProviderService {
     }
 
     @Override
+    @Transactional
     public ProviderResponse updateProvider(String id, ProviderRequest req) {
         try {
             HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER146);
@@ -107,6 +110,7 @@ public class ProviderService implements IProviderService {
     }
 
     @Override
+    @Transactional
     public ProviderResponse deleteProvider(String id) {
         try {
             HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER146);

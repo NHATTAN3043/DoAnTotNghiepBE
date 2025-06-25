@@ -13,24 +13,19 @@ import vn.nextcore.device.dto.req.UserRequest;
 import vn.nextcore.device.dto.resp.DepartmentResponse;
 import vn.nextcore.device.dto.resp.RoleResponse;
 import vn.nextcore.device.dto.resp.UserResponse;
-import vn.nextcore.device.entity.Department;
-import vn.nextcore.device.entity.Role;
-import vn.nextcore.device.entity.User;
+import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.exception.HandlerException;
-import vn.nextcore.device.repository.DepartmentRepository;
-import vn.nextcore.device.repository.RoleRepository;
-import vn.nextcore.device.repository.UserRepository;
+import vn.nextcore.device.repository.*;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.service.storageFiles.IStorageService;
 import vn.nextcore.device.util.ParseUtils;
 import vn.nextcore.device.validation.HandlerValidateParams;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
@@ -53,6 +48,12 @@ public class UserService implements IUserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private UserProjectRepository userProjectRepository;
 
     @Override
     public UserResponse getMe(HttpServletRequest request) {
@@ -102,9 +103,22 @@ public class UserService implements IUserService {
 
             newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
-
             userRepository.save(newUser);
 
+            if (userRequest.getProjectIds() != null) {
+                for (String id : userRequest.getProjectIds()) {
+                    HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER155);
+                    Project project = projectRepository.findProjectById(Long.parseLong(id));
+                    if (project == null) {
+                        throw new HandlerException(ErrorCodeEnum.ER156.getCode(), ErrorCodeEnum.ER156.getMessage(), PathEnum.USER_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                    }
+                    UserProject userProject = new UserProject();
+                    userProject.setUser(newUser);
+                    userProject.setDateOfJoin(new Date());
+                    userProject.setProject(project);
+                    userProjectRepository.save(userProject);
+                }
+            }
             return new UserResponse(newUser.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
@@ -147,6 +161,56 @@ public class UserService implements IUserService {
             }
 
             userRepository.save(user);
+
+            if (userRequest.getProjectIds() != null) {
+                Set<Long> newProjectIds = userRequest.getProjectIds().stream()
+                        .map(idStr -> {
+                            HandlerValidateParams.validatePositiveInt(idStr, ErrorCodeEnum.ER155);
+                            return Long.parseLong(idStr);
+                        })
+                        .collect(Collectors.toSet());
+
+                // Lấy projectId hiện tại của user
+                Set<Long> currentProjectIds = user.getUserProjects().stream()
+                        .map(up -> up.getProject().getId())
+                        .collect(Collectors.toSet());
+
+                // Những projectId cần thêm mới
+                Set<Long> toAdd = new HashSet<>(newProjectIds);
+                toAdd.removeAll(currentProjectIds);
+
+                // Những projectId cần xóa
+                Set<Long> toRemove = new HashSet<>(currentProjectIds);
+                toRemove.removeAll(newProjectIds);
+
+                // Thêm mới
+                for (Long projectId : toAdd) {
+                    Project project = projectRepository.findProjectById(projectId);
+                    if (project == null) {
+                        throw new HandlerException(
+                                ErrorCodeEnum.ER156.getCode(),
+                                ErrorCodeEnum.ER156.getMessage(),
+                                PathEnum.USER_PATH.getPath(),
+                                HttpStatus.BAD_REQUEST
+                        );
+                    }
+                    UserProject userProject = new UserProject();
+                    userProject.setUser(user);
+                    userProject.setProject(project);
+                    userProject.setDateOfJoin(new Date());
+                    userProjectRepository.save(userProject);
+                }
+
+                // Xóa các UserProject không còn trong list mới
+                List<UserProject> userProjectsToDelete = user.getUserProjects().stream()
+                        .filter(up -> toRemove.contains(up.getProject().getId()))
+                        .collect(Collectors.toList());
+
+                for (UserProject up : userProjectsToDelete) {
+                    user.getUserProjects().remove(up);
+                }
+            }
+
             return new UserResponse(user.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
@@ -173,6 +237,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public UserResponse deleteUser(String id) {
         try {
             HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER140);
@@ -247,6 +312,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse createDepartment(DepartmentRequest request) {
         Department newDepartment = new Department();
         try {
@@ -260,6 +326,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public void changePassword(HttpServletRequest request, ChangePasswordRequest req) {
         try {
             User user = jwtUtil.extraUserFromRequest(request);

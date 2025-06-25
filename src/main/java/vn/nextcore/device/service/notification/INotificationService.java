@@ -8,7 +8,7 @@ import vn.nextcore.device.dto.resp.NotificationResponse;
 import java.util.List;
 
 public interface INotificationService {
-    String sendNotification(List<String> tokens, String title, String content, String noticeType, String status);
+    String sendNotification(List<String> tokens, String title, String content, String noticeType, String status, String url);
 
     void saveFcmToken(FcmToken req);
 

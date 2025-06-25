@@ -13,6 +13,7 @@ import vn.nextcore.device.entity.DeviceTokens;
 import vn.nextcore.device.entity.Notifications;
 import vn.nextcore.device.entity.User;
 import vn.nextcore.device.enums.ErrorCodeEnum;
+import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.DeviceTokensRepository;
 import vn.nextcore.device.repository.NotificationRepository;
@@ -43,8 +44,7 @@ public class NotificationService implements INotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public String sendNotification(List<String> tokens, String title, String content, String noticeType, String status) {
-        List<String> registrationTokens = tokens;
+    public String sendNotification(List<String> tokens, String title, String content, String noticeType, String status, String url) {
         Notification notification = Notification.builder()
                 .setTitle(title)
                 .setBody(content)
@@ -53,6 +53,9 @@ public class NotificationService implements INotificationService {
         Map<String, String> data = new HashMap<>();
         data.put("type", noticeType);
         data.put("status", status);
+        data.put("title", title);
+        data.put("content", content);
+        data.put("url", url);
 
         int successCount = 0;
         int failureCount = 0;
@@ -60,7 +63,7 @@ public class NotificationService implements INotificationService {
         for (String token : tokens) {
             Message message = Message.builder()
                     .setToken(token)
-                    .setNotification(notification)
+//                    .setNotification(notification)
                     .putAllData(data)
                     .build();
             try {
@@ -69,9 +72,9 @@ public class NotificationService implements INotificationService {
             } catch (FirebaseMessagingException e) {
                 failureCount++;
                 e.printStackTrace();
+                throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
         }
-
         return "Successfully sent to " + successCount + " devices, failures: " + failureCount;
     }
 
@@ -85,7 +88,7 @@ public class NotificationService implements INotificationService {
                 throw new HandlerException(ErrorCodeEnum.ER148.getCode(), ErrorCodeEnum.ER148.getMessage(), "api/save-fcm-token", HttpStatus.BAD_REQUEST);
             }
             DeviceTokens deviceTokensExists = deviceTokensRepository
-                    .findDeviceTokensByUserIdAndDeletedAtIsNull(req.getUserId());
+                    .findDeviceTokensByUserIdAndDeletedAtIsNull(user.getId());
             if (deviceTokensExists != null) {
                 deviceTokensExists.setToken(req.getToken());
                 deviceTokensExists.setExpired(false);

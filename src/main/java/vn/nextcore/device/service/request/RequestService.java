@@ -53,6 +53,9 @@ public class RequestService implements IRequestService {
     @Autowired
     private INotificationService notificationService;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     private String BACK_OFFICE = "Back Office";
 
     private String EMPLOYEE = "Employee";
@@ -62,6 +65,11 @@ public class RequestService implements IRequestService {
     private List<String> allowedFields = Arrays.asList("approvedDate", "createdDate");
 
     private Long managerId = 3L;
+
+    private String MANAGER_DETAIL_REQUEST_PATH = "/next-device/manager/request/";
+    private String EMPLOYEE_DETAIL_REQUEST_PATH = "/next-device/employee/my-request/";
+    private String BACKOFFICE_DETAIL_REQUEST_PATH = "/next-device/back-office/request/";
+
 
     @Override
     @Transactional
@@ -83,7 +91,7 @@ public class RequestService implements IRequestService {
             }
 
             Set<RequestGroup> requestGroups = new HashSet<>();
-            for(ReqTypesRequest typesRequest : dataRequest.getRequestGroups()) {
+            for (ReqTypesRequest typesRequest : dataRequest.getRequestGroups()) {
                 RequestGroup newReqGroup = new RequestGroup();
                 Group group = groupRepository.findGroupById(typesRequest.getGroupId());
                 if (group == null) {
@@ -107,27 +115,36 @@ public class RequestService implements IRequestService {
             requestRepository.save(newRequest);
 
             List<User> listAdmin = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("3"));
-            List<String> tokens = new ArrayList<>();
-            for (User admin : listAdmin) {
-                List<DeviceTokens> adminTokens = admin.getUserDeviceTokens();
-                Notifications notifications = new Notifications();
-                notifications.setContent(user.getUserName() + " đã gửi một yêu cầu");
-                notifications.setTitle("Yêu cầu mới");
-                notifications.setCreatedBy(user);
-                notifications.setUser(admin);
-                notifications.setCreatedAt(new Date());
-                notifications.setPath("/manager/request/" + newRequest.getId());
-
-                admin.getUserNotifications().add(notifications);
-                userRepository.save(admin);
-                for (DeviceTokens tokenRecord : adminTokens) {
-                    tokens.add(tokenRecord.getToken());
-                }
-            }
-            String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu mới", user.getUserName() + " đã gửi một yêu cầu", "addRequest", "new");
+            List<String> tokens = getTokensFromUserAndSaveNotification(listAdmin, "Yêu cầu mới", user.getUserName() + " đã gửi một yêu cầu", user, MANAGER_DETAIL_REQUEST_PATH + newRequest.getId());
+            String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu mới", user.getUserName() + " đã gửi một yêu cầu", "addRequest", "new", MANAGER_DETAIL_REQUEST_PATH + newRequest.getId());
             return new ReqResponse(newRequest.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private List<String> getTokensFromUserAndSaveNotification(List<User> users, String title, String content, User createdBy, String path) {
+        try {
+            List<String> tokens = new ArrayList<>();
+            for (User user : users) {
+                List<DeviceTokens> userTokens = user.getUserDeviceTokens();
+                Notifications notifications = new Notifications();
+                notifications.setContent(content);
+                notifications.setTitle(title);
+                notifications.setCreatedBy(createdBy);
+                notifications.setUser(user);
+                notifications.setCreatedAt(new Date());
+                notifications.setPath(path);
+
+                notificationRepository.save(notifications);
+                for (DeviceTokens tokenRecord : userTokens) {
+                    tokens.add(tokenRecord.getToken());
+                }
+            }
+            return tokens;
         } catch (Exception e) {
             e.printStackTrace();
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -139,7 +156,7 @@ public class RequestService implements IRequestService {
         ListRequestResponse result = new ListRequestResponse();
         try {
             if (createdBy != null) {
-                if (!userRepository.existsById(createdBy))  {
+                if (!userRepository.existsById(createdBy)) {
                     throw new HandlerException(ErrorCodeEnum.ER025.getCode(), ErrorCodeEnum.ER025.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
                 }
             }
@@ -203,13 +220,35 @@ public class RequestService implements IRequestService {
             if (request1 == null) {
                 throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
+
             request1.setStatus(data.getStatus());
             request1.setApprover(user);
             request1.setApprovedDate(new Date());
-
             requestRepository.save(request1);
+
+            boolean isApproved = Status.REQUEST_APPROVED.getStatus().equals(data.getStatus());
+
+            List<User> userRequest = new ArrayList<>();
+            userRequest.add(request1.getCreatedBy());
+            List<String> userTokens = getTokensFromUserAndSaveNotification(userRequest, "Phê duyệt yêu cầu", isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn", user, EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
+            String res = notificationService.sendNotification(userTokens,
+                    "Phê duyệt yêu cầu",
+                    isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn",
+                    "approvedRequest", "new",
+                    EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
+
+            if (isApproved == true) {
+                List<User> listBackOffice = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("1"));
+                List<String> tokens = getTokensFromUserAndSaveNotification(listBackOffice, "Phê duyệt yêu cầu", "Một yêu cầu đã được phê duyệt", user, BACKOFFICE_DETAIL_REQUEST_PATH + data.getId());
+                String batchResponse = notificationService.sendNotification(tokens,
+                        "Phê duyệt yêu cầu", "Một yêu cầu đã được phê duyệt",
+                        "approvedRequest", "new",
+                        BACKOFFICE_DETAIL_REQUEST_PATH + data.getId());
+            }
+
+            Thread.sleep(1000);
             return new ReqResponse(request1.getId());
-        }  catch (HandlerException handlerException) {
+        } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -70,6 +70,7 @@ public class RequestController {
     }
 
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public DataResponse<ReqResponse> approvedRequest(HttpServletRequest request, @RequestBody ApproveRequest data) {
         ReqResponse result = requestService.approveRequest(request, data);
         return new DataResponse<>(result);

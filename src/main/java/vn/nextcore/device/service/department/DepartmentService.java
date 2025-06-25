@@ -3,6 +3,7 @@ package vn.nextcore.device.service.department;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.dto.req.DepartmentRequest;
 import vn.nextcore.device.dto.resp.DepartmentResponse;
 import vn.nextcore.device.dto.resp.ProviderResponse;
@@ -60,6 +61,7 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse updateDepartment(String id, DepartmentRequest req) {
         try {
             HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);
@@ -81,6 +83,7 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
+    @Transactional
     public void deleteDepartmentById(String id) {
         try {
             HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);
