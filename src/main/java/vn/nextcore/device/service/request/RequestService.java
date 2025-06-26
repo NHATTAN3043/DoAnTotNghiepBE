@@ -24,6 +24,7 @@ import vn.nextcore.device.service.notification.INotificationService;
 import vn.nextcore.device.util.CheckerUtils;
 import vn.nextcore.device.util.JsonUtils;
 import vn.nextcore.device.util.ParseUtils;
+import vn.nextcore.device.validation.HandlerValidateParams;
 
 import java.util.*;
 
@@ -91,19 +92,22 @@ public class RequestService implements IRequestService {
             }
 
             Set<RequestGroup> requestGroups = new HashSet<>();
-            for (ReqTypesRequest typesRequest : dataRequest.getRequestGroups()) {
-                RequestGroup newReqGroup = new RequestGroup();
-                Group group = groupRepository.findGroupById(typesRequest.getGroupId());
-                if (group == null) {
-                    throw new HandlerException(ErrorCodeEnum.ER125.getCode(), ErrorCodeEnum.ER125.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            if (dataRequest.getRequestGroups() != null && !dataRequest.getRequestGroups().isEmpty()) {
+                for (ReqTypesRequest typesRequest : dataRequest.getRequestGroups()) {
+                    RequestGroup newReqGroup = new RequestGroup();
+                    Group group = groupRepository.findGroupById(typesRequest.getGroupId());
+                    if (group == null) {
+                        throw new HandlerException(ErrorCodeEnum.ER125.getCode(), ErrorCodeEnum.ER125.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                    }
+                    newReqGroup.setGroup(group);
+                    newReqGroup.setQuantity(typesRequest.getQuantity());
+                    newReqGroup.setRequest(newRequest);
+                    newReqGroup.setStatus("waiting");
+                    requestGroups.add(newReqGroup);
                 }
-                newReqGroup.setGroup(group);
-                newReqGroup.setQuantity(typesRequest.getQuantity());
-                newReqGroup.setRequest(newRequest);
-                newReqGroup.setStatus("waiting");
-                requestGroups.add(newReqGroup);
+                newRequest.setRequestGroups(requestGroups);
             }
-            newRequest.setRequestGroups(requestGroups);
+
             newRequest.setCreatedDate(new Date());
             if (managerId.equals(user.getRole().getId())) {
                 newRequest.setStatus(Status.REQUEST_APPROVED.getStatus());
@@ -212,6 +216,7 @@ public class RequestService implements IRequestService {
     }
 
     @Override
+    @Transactional
     public ReqResponse approveRequest(HttpServletRequest request, ApproveRequest data) {
         try {
             User user = jwtUtil.extraUserFromRequest(request);
@@ -246,8 +251,91 @@ public class RequestService implements IRequestService {
                         BACKOFFICE_DETAIL_REQUEST_PATH + data.getId());
             }
 
-            Thread.sleep(1000);
             return new ReqResponse(request1.getId());
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ReqResponse updateRequest(String id, HttpServletRequest request, DataRequest data) {
+        try {
+            HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);
+            User user = jwtUtil.extraUserFromRequest(request);
+            Request requestExists = requestRepository.findRequestById(Long.parseLong(id));
+            if (requestExists == null) {
+                throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+
+            if (!Status.REQUEST_PENDING.getStatus().equals(requestExists.getStatus()) && !Status.REQUEST_PROGRESS.getStatus().equals(requestExists.getStatus())) {
+                throw new HandlerException(ErrorCodeEnum.ER159.getCode(), ErrorCodeEnum.ER159.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+
+            if (!user.getId().equals(requestExists.getCreatedBy().getId()) && user.getRole().getId() == 2L) {
+                throw new HandlerException(ErrorCodeEnum.ER160.getCode(), ErrorCodeEnum.ER160.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.FORBIDDEN);
+            }
+
+
+            if (requestExists.getDeliveryNotes() != null && !requestExists.getDeliveryNotes().isEmpty()) {
+                boolean hasNotConfirmed = requestExists.getDeliveryNotes()
+                        .stream()
+                        .anyMatch(note -> !Boolean.TRUE.equals(note.getIsConfirm()));
+                if (hasNotConfirmed) {
+                    throw new HandlerException(ErrorCodeEnum.ER161.getCode(), ErrorCodeEnum.ER161.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            if (data.getProjectId() != null) {
+                Project project = projectRepository.findProjectById(data.getProjectId());
+                if (project == null) {
+                    throw new HandlerException(ErrorCodeEnum.ER123.getCode(), ErrorCodeEnum.ER123.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                }
+                requestExists.setProject(project);
+            }
+
+            if (data.getTitle() != null) {
+                requestExists.setTitle(data.getTitle());
+            }
+
+            if (data.getDescriptions() != null) {
+                requestExists.setDescription(data.getDescriptions());
+            }
+
+            if (data.getRequestType() != null) {
+                requestExists.setRequestType(data.getRequestType());
+            }
+            if (data.getStatus() != null) {
+                requestExists.setStatus(data.getStatus());
+            }
+
+            Set<RequestGroup> requestGroups = new HashSet<>();
+            if (data.getRequestGroups() != null && !data.getRequestGroups().isEmpty()) {
+                for (ReqTypesRequest typesRequest : data.getRequestGroups()) {
+                    RequestGroup newReqGroup = new RequestGroup();
+                    Group group = groupRepository.findGroupById(typesRequest.getGroupId());
+                    if (group == null) {
+                        throw new HandlerException(ErrorCodeEnum.ER125.getCode(), ErrorCodeEnum.ER125.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+                    }
+                    newReqGroup.setGroup(group);
+                    newReqGroup.setQuantity(typesRequest.getQuantity());
+                    newReqGroup.setRequest(requestExists);
+                    newReqGroup.setStatus("waiting");
+                    requestGroups.add(newReqGroup);
+                }
+                requestExists.getRequestGroups().clear();
+                requestExists.getRequestGroups().addAll(requestGroups);
+            }
+
+            requestRepository.save(requestExists);
+
+            if (Status.REQUEST_DONE.getStatus().equals(data.getStatus())) {
+                List<String> tokens = getTokensFromUserAndSaveNotification(Arrays.asList(requestExists.getCreatedBy()), "Yêu cầu hoàn thành", user.getUserName() + " đã hoàn thành yêu cầu của bạn", user, EMPLOYEE_DETAIL_REQUEST_PATH + requestExists.getId());
+                String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu hoàn thành", user.getUserName() + " đã hoàn thành yêu cầu của bạn", "doneRequest", "done", EMPLOYEE_DETAIL_REQUEST_PATH + requestExists.getId());
+            }
+            return new ReqResponse(requestExists.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
         } catch (Exception e) {

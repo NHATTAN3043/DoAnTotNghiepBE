@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.nextcore.device.entity.Device;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +29,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     boolean existsDeviceByGroupIdAndDeletedAtIsNull(Long id);
 
-    @Query("SELECT d FROM Device d WHERE d.dateMaintenance BETWEEN :today AND :next7Days")
+    @Query("SELECT d FROM Device d WHERE d.dateMaintenance BETWEEN :today AND :next7Days AND (d.isNotified = false OR d.isNotified IS NULL)")
     List<Device> findDevicesWithMaintenanceExpiringWithin7Days(Date today, Date next7Days);
 }

@@ -75,4 +75,14 @@ public class RequestController {
         ReqResponse result = requestService.approveRequest(request, data);
         return new DataResponse<>(result);
     }
+
+    @PutMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public DataResponse<ReqResponse> updateProject(
+            HttpServletRequest request,
+            @PathVariable("id") String id,
+            @RequestBody DataRequest data) {
+        ReqResponse result = requestService.updateRequest(id, request, data);
+        return new DataResponse<>(result);
+    }
  }

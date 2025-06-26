@@ -85,6 +85,9 @@ public enum ErrorCodeEnum {
     ER156("ER156", "projectId not found"),
     ER157("ER157", "project contain user"),
     ER158("ER158", "Error when send notification"),
+    ER159("ER159", "Request be approved done by admin"),
+    ER160("ER160", "You are not created of request"),
+    ER161("ER161", "Request has delivery note not confirm"),
     ER404("ER404", "Not found"),
     ER403("ER403", "FOR BIDDEN");
 

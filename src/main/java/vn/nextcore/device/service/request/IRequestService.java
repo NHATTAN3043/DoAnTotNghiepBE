@@ -25,6 +25,8 @@ public interface IRequestService {
 
     ReqResponse getReqDetail(String id);
 
-    ReqResponse approveRequest( HttpServletRequest request , ApproveRequest data);
+    ReqResponse approveRequest(HttpServletRequest request , ApproveRequest data);
+
+    ReqResponse updateRequest(String id, HttpServletRequest request , DataRequest data);
 
 }

@@ -87,7 +87,7 @@ public class Request {
     private Project project;
 
     // relationship of request_group
-    @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<RequestGroup> requestGroups = new HashSet<>();
 
     //relationship of delivery_notes

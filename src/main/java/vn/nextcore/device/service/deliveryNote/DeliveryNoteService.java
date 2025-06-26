@@ -20,6 +20,7 @@ import vn.nextcore.device.repository.RequestRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.service.notification.INotificationService;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private static final String ACTIVE = "active";
     private static final String GOOD = "good";
     private String EMPLOYEE_DETAIL_REQUEST_PATH = "/next-device/employee/my-request/";
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 
     @Override
@@ -91,6 +93,9 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             for (NoteDeviceRequest note : request.getNoteDeviceRequests()) {
                 NoteDevice noteDevice = new NoteDevice();
                 noteDevice.setDescriptionDevice(note.getDescriptionDevice());
+                if (request.getAppointmentDate() != null) {
+                    noteDevice.setDateNote(dateFormat.parse(request.getAppointmentDate()));
+                }
                 Device device = deviceRepository.findDeviceById(note.getDeviceId());
 
                 if (ALLOCATE.equals(request.getTypeNote())) {
@@ -105,7 +110,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                 }
 
                 if (MAINTENANCE.equals(request.getTypeNote())) {
-                    device.setUsingBy(null);
+                    device.setUsingBy(user);
                     device.setStatus(MAINTENANCE);
                 }
 

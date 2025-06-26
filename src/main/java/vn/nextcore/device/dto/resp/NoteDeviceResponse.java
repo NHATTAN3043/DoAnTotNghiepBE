@@ -21,4 +21,6 @@ public class NoteDeviceResponse {
     private DeliveryNoteResponse deliveryNoteResponse;
 
     private DeviceResponse device;
+
+    private String appointmentDate;
 }

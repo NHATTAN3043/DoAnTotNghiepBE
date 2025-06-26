@@ -157,6 +157,9 @@ public class ParseUtils {
                             noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
                             noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
                             noteDeviceResponse.setPriceMaintenance(noteDevice.getPriceDevice());
+                            if (noteDevice.getDateNote() != null) {
+                                noteDeviceResponse.setAppointmentDate(dateFormat.format(noteDevice.getDateNote()));
+                            }
 
                             DeviceResponse deviceResponse = new DeviceResponse();
                             deviceResponse.setDeviceId(noteDevice.getDevice().getId());
