@@ -11,6 +11,7 @@ import vn.nextcore.device.dto.resp.ListRequestResponse;
 import vn.nextcore.device.dto.resp.ReqResponse;
 import vn.nextcore.device.entity.Request;
 import vn.nextcore.device.entity.User;
+import vn.nextcore.device.entity.UserRequestVisibility;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.Operator;
 import vn.nextcore.device.enums.PathEnum;
@@ -26,7 +27,7 @@ import java.util.List;
 
 
 @Repository
-public class RequestCriteriaRepository implements IRequestCriteriaRepository{
+public class RequestCriteriaRepository implements IRequestCriteriaRepository {
 
     private final String ASC = "ASC";
     private final String DESC = "DESC";
@@ -36,7 +37,7 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
-    public ListRequestResponse listRequestsCriteria(String title, String status, String exceptStatus, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit, List<FilterRequest> dateFilters) {
+    public ListRequestResponse listRequestsCriteria(String title, String status, String exceptStatus, String type, Long createdBy, String sortCreatedDate, String sortApprovedDate, Integer offset, Integer limit, List<FilterRequest> dateFilters, User getBy) {
         ListRequestResponse response = new ListRequestResponse();
         try {
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -44,14 +45,25 @@ public class RequestCriteriaRepository implements IRequestCriteriaRepository{
             Root<Request> requestRoot = createQuery.from(Request.class);
 
             Join<Request, User> userJoin = requestRoot.join("createdBy", JoinType.LEFT);
+            Join<Request, UserRequestVisibility> visibilityJoin = requestRoot
+                    .join("visibilities", JoinType.LEFT);
+
+            visibilityJoin.on(cb.equal(visibilityJoin.get("user").get("id"), getBy.getId()));
 
             List<Predicate> predicates = new ArrayList<>();
 
             if (title != null) {
-            Expression<String> unaccentedField = cb.function("unaccent", String.class, cb.lower(requestRoot.get("title")));
-            Expression<String> unaccentedValue = cb.function("unaccent", String.class, cb.literal("%" + title.toLowerCase() + "%"));
-            predicates.add(cb.like(unaccentedField, unaccentedValue));
+                Expression<String> unaccentedField = cb.function("unaccent", String.class, cb.lower(requestRoot.get("title")));
+                Expression<String> unaccentedValue = cb.function("unaccent", String.class, cb.literal("%" + title.toLowerCase() + "%"));
+                predicates.add(cb.like(unaccentedField, unaccentedValue));
             }
+
+            Predicate notHidden = cb.or(
+                    cb.isNull(visibilityJoin.get("hidden")),
+                    cb.isFalse(visibilityJoin.get("hidden"))
+            );
+
+            predicates.add(notHidden);
 
             if (status != null) {
                 predicates.add(cb.equal(cb.lower(requestRoot.get("status")), status.toLowerCase()));

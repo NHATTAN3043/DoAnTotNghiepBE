@@ -78,11 +78,20 @@ public class RequestController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public DataResponse<ReqResponse> updateProject(
+    public DataResponse<ReqResponse> updateRequest(
             HttpServletRequest request,
             @PathVariable("id") String id,
             @RequestBody DataRequest data) {
         ReqResponse result = requestService.updateRequest(id, request, data);
+        return new DataResponse<>(result);
+    }
+
+    @PutMapping(value = "/hidden/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public DataResponse<ReqResponse> updateRequestHidden(
+            HttpServletRequest request,
+            @PathVariable("id") String id) {
+        ReqResponse result = requestService.updateRequestHidden(id, request);
         return new DataResponse<>(result);
     }
  }

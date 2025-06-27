@@ -20,6 +20,8 @@ public class DeliveryNoteRequest {
 
     private Boolean isConfirm;
 
+    private String priceSell;
+
     private List<NoteDeviceRequest> noteDeviceRequests;
 
 }

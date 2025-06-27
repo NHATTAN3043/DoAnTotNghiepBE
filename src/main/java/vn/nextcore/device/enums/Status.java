@@ -11,6 +11,7 @@ public enum Status {
     DEVICE_ACTIVE("active"),
     ACTION_ALLOCATE("allocate"),
     ACTION_MAINTENANCE("maintenance"),
+    ACTION_SCRAP("scrap"),
     ACTION_RETRIEVE("retrieve");
 
     private final String status;

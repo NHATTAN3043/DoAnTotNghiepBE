@@ -93,4 +93,9 @@ public class Request {
     //relationship of delivery_notes
     @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DeliveryNote> deliveryNotes = new ArrayList<>();
+
+    // relationship of user request hidden
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserRequestVisibility> visibilities = new ArrayList<>();
+
 }

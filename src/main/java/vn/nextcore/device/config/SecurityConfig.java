@@ -39,7 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
                             "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**", "/ws/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/device/*").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/device/*", "/api/user/**").permitAll()
                     .requestMatchers("/api/request/**", "/api/group/**", "/api/project", "/api/user/getMe", "/api/user/getDepartment", "/api/user/update-profile/**", "/api/user/change-password", "/api/delivery/**").hasAnyAuthority("Employee", "Back Office", "Manager")
                     .requestMatchers("/api/device/**", "/api/specification/**", "/api/provider/**", "/api/statistics/**").hasAnyAuthority("Back Office", "Manager")
                     .requestMatchers("/api/user/**", "/api/department/**").hasAuthority("Manager")

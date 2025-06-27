@@ -62,7 +62,7 @@ public class DeliveryNote {
 
     // relationship of request
     @ManyToOne
-    @JoinColumn(name = REQUEST_ID, nullable = false)
+    @JoinColumn(name = REQUEST_ID)
     private Request request;
 
     // relationship of user

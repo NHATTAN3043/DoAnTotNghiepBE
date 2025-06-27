@@ -13,6 +13,7 @@ import vn.nextcore.device.dto.resp.ListRequestResponse;
 import vn.nextcore.device.dto.resp.ReqGroupResponse;
 import vn.nextcore.device.dto.resp.ReqResponse;
 import vn.nextcore.device.entity.*;
+import vn.nextcore.device.entity.key.UserRequestKey;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.enums.Status;
@@ -56,6 +57,9 @@ public class RequestService implements IRequestService {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private RequestVisibleRepository requestVisibleRepository;
 
     private String BACK_OFFICE = "Back Office";
 
@@ -168,20 +172,20 @@ public class RequestService implements IRequestService {
 
             User user = jwtUtil.extraUserFromRequest(request);
             if (isGetMyRequest) {
-                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters, user);
                 return result;
             }
 
             if (EMPLOYEE.equals(user.getRole().getName())) {
-                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, user.getId(), sortCreatedDate, sortApprovedDate, offset, limit, filters, user);
                 return result;
             }
             if (MANAGER.equals(user.getRole().getName())) {
-                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, null, type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters, user);
                 return result;
             }
             if (BACK_OFFICE.equals(user.getRole().getName())) {
-                result = requestCriteriaRepository.listRequestsCriteria(title, status, Status.REQUEST_PENDING.getStatus(), type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters);
+                result = requestCriteriaRepository.listRequestsCriteria(title, status, Status.REQUEST_PENDING.getStatus(), type, createdBy, sortCreatedDate, sortApprovedDate, offset, limit, filters, user);
                 return result;
             }
             return result;
@@ -195,6 +199,7 @@ public class RequestService implements IRequestService {
     @Override
     public ReqResponse getReqDetail(String id) {
         try {
+            HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);
             Request request = requestRepository.findRequestById(Long.valueOf(id));
             if (request == null) {
                 throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
@@ -310,6 +315,7 @@ public class RequestService implements IRequestService {
             if (data.getStatus() != null) {
                 requestExists.setStatus(data.getStatus());
             }
+            requestExists.setUpdatedAt(new Date());
 
             Set<RequestGroup> requestGroups = new HashSet<>();
             if (data.getRequestGroups() != null && !data.getRequestGroups().isEmpty()) {
@@ -335,6 +341,41 @@ public class RequestService implements IRequestService {
                 List<String> tokens = getTokensFromUserAndSaveNotification(Arrays.asList(requestExists.getCreatedBy()), "Yêu cầu hoàn thành", user.getUserName() + " đã hoàn thành yêu cầu của bạn", user, EMPLOYEE_DETAIL_REQUEST_PATH + requestExists.getId());
                 String batchResponse = notificationService.sendNotification(tokens, "Yêu cầu hoàn thành", user.getUserName() + " đã hoàn thành yêu cầu của bạn", "doneRequest", "done", EMPLOYEE_DETAIL_REQUEST_PATH + requestExists.getId());
             }
+            return new ReqResponse(requestExists.getId());
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ReqResponse updateRequestHidden(String id, HttpServletRequest request) {
+        try {
+            HandlerValidateParams.validateInt(id, ErrorCodeEnum.ER149);
+            User user = jwtUtil.extraUserFromRequest(request);
+            Request requestExists = requestRepository.findRequestById(Long.parseLong(id));
+            if (requestExists == null) {
+                throw new HandlerException(ErrorCodeEnum.ER135.getCode(), ErrorCodeEnum.ER135.getMessage(), PathEnum.REQUEST_PATH.getPath(), HttpStatus.BAD_REQUEST);
+            }
+            Optional<UserRequestVisibility> optionalVisibility = requestVisibleRepository.findByUserIdAndRequestId(user.getId(), Long.parseLong(id));
+
+            if (optionalVisibility.isPresent()) {
+                UserRequestVisibility visibility = optionalVisibility.get();
+                visibility.setHidden(true);
+                requestVisibleRepository.save(visibility);
+            } else {
+                UserRequestVisibility visibility = new UserRequestVisibility();
+
+                UserRequestKey key = new UserRequestKey(user.getId(), Long.parseLong(id));
+                visibility.setId(key);
+                visibility.setUser(user);
+                visibility.setRequest(requestExists);
+                visibility.setHidden(true);
+
+                requestVisibleRepository.save(visibility);
+            }
+
             return new ReqResponse(requestExists.getId());
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), handlerException.getPath(), handlerException.getStatus());

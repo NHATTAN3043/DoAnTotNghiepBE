@@ -8,4 +8,7 @@ public interface IDeliveryNoteService {
     DeliveryNoteResponse createDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request);
 
     DeliveryNoteResponse confirmDeliveryNote(HttpServletRequest request, DeliveryNoteRequest data);
+
+    DeliveryNoteResponse createScrapDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request);
+
 }

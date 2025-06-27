@@ -43,7 +43,7 @@ public class WarrantyNotificationScheduler {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     @Transactional
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     public void checkWarrantyAndNotify() {
         LocalDate todayLocal = LocalDate.now();
         Date today = java.sql.Date.valueOf(todayLocal);
@@ -52,7 +52,6 @@ public class WarrantyNotificationScheduler {
                 next7Days.atStartOfDay(ZoneId.systemDefault()).toInstant()
         );
 
-        // Lấy các thiết bị có ngày hết hạn là hôm nay
         List<Device> devices = deviceRepository.findDevicesWithMaintenanceExpiringWithin7Days(today, next7DaysDate);
 
         List<User> listBO = userRepository.findAllByRoleIdAndDeletedAtIsNull(1l);

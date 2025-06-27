@@ -30,4 +30,10 @@ public class DeliveryNoteController {
         DeliveryNoteResponse result = deliveryNoteService.confirmDeliveryNote(request, data);
         return new DataResponse<>(result);
     }
+
+    @PostMapping("/scrap")
+    public DataResponse<DeliveryNoteResponse> scrapDevice(HttpServletRequest httpRequest, @RequestBody DeliveryNoteRequest request) {
+        DeliveryNoteResponse result = deliveryNoteService.createScrapDeliveryNote(httpRequest, request);
+        return new DataResponse<>(result);
+    }
 }

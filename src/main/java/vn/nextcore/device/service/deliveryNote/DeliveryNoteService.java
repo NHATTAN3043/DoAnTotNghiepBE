@@ -13,16 +13,14 @@ import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.enums.Status;
 import vn.nextcore.device.exception.HandlerException;
-import vn.nextcore.device.repository.DeliveryNoteRepository;
-import vn.nextcore.device.repository.DeviceRepository;
-import vn.nextcore.device.repository.ProviderRepository;
-import vn.nextcore.device.repository.RequestRepository;
+import vn.nextcore.device.repository.*;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.service.notification.INotificationService;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DeliveryNoteService implements IDeliveryNoteService {
@@ -42,6 +40,12 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private INotificationService notificationService;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private JwtUtil jwtUtil;
     private static final String ALLOCATE = "allocate";
     private static final String RETRIEVE = "retrieve";
@@ -51,6 +55,8 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private static final String ACTIVE = "active";
     private static final String GOOD = "good";
     private String EMPLOYEE_DETAIL_REQUEST_PATH = "/next-device/employee/my-request/";
+
+    private String DEVICE_PATH = "/next-device/device-info/";
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 
@@ -64,6 +70,9 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             deliveryNote.setTypeNote(request.getTypeNote());
             deliveryNote.setDescription(request.getDescription());
             deliveryNote.setIsConfirm(null);
+            if (MAINTENANCE.equals(request.getTypeNote())) {
+                deliveryNote.setIsConfirm(true);
+            }
 
             Request requestExists = requestRepository.findRequestById(request.getRequestId());
             if (requestExists == null) {
@@ -135,12 +144,13 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             notifications.setCreatedBy(user);
             notifications.setUser(deliveryNote.getRequest().getCreatedBy());
             notifications.setCreatedAt(new Date());
-            notifications.setPath("/");
+            notifications.setPath(EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
+            notificationRepository.save(notifications);
 
             List<String> tokens = deliveryNote.getRequest().getCreatedBy()
                     .getUserDeviceTokens()
                     .stream()
-                    .map(DeviceTokens::getToken )
+                    .map(DeviceTokens::getToken)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             String batchResponse = notificationService.sendNotification(tokens,
@@ -164,7 +174,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
                 throw new HandlerException(ErrorCodeEnum.ER102.getCode(), ErrorCodeEnum.ER102.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.UNAUTHORIZED);
             }
 
-            if (!user.getId().equals(deliveryNote.getRequest().getCreatedBy().getId()) ) {
+            if (!user.getId().equals(deliveryNote.getRequest().getCreatedBy().getId())) {
                 throw new HandlerException(ErrorCodeEnum.ER136.getCode(), ErrorCodeEnum.ER136.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.BAD_REQUEST);
             }
 
@@ -186,4 +196,72 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Override
+    public DeliveryNoteResponse createScrapDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request) {
+        try {
+            Long deviceId = 0L;
+            DeliveryNote deliveryNote = new DeliveryNote();
+            deliveryNote.setDeliveryDate(new Date());
+            deliveryNote.setCreatedAt(new Date());
+            deliveryNote.setTypeNote(request.getTypeNote());
+            deliveryNote.setDescription(request.getDescription());
+            deliveryNote.setIsConfirm(true);
+
+            // add createBy
+            User user = jwtUtil.extraUserFromRequest(httpRequest);
+            deliveryNote.setCreatedBy(user);
+
+            List<NoteDevice> noteDevices = new ArrayList<>();
+            for (NoteDeviceRequest note : request.getNoteDeviceRequests()) {
+                NoteDevice noteDevice = new NoteDevice();
+                noteDevice.setDescriptionDevice(note.getDescriptionDevice());
+                Device device = deviceRepository.findDeviceById(note.getDeviceId());
+                device.setUsingBy(null);
+                device.setStatus(Status.ACTION_SCRAP.getStatus());
+                deviceId = device.getId();
+
+                if (request.getPriceSell() != null && !request.getPriceSell().isEmpty()) {
+                    device.setPriceSell(Double.parseDouble(request.getPriceSell()));
+                }
+                noteDevice.setDevice(device);
+                noteDevice.setDeliveryNote(deliveryNote);
+                noteDevices.add(noteDevice);
+            }
+            deliveryNote.setNoteDevices(noteDevices);
+            deliveryNoteRepository.save(deliveryNote);
+
+            List<User> listAdmin = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("3"));
+
+            // save notification
+            Notifications notifications = new Notifications();
+            notifications.setTitle("Tiêu hủy/thanh lý thiết bị");
+            notifications.setContent("Một thiết bị đã được tiêu hủy hoặc thanh lý");
+            notifications.setCreatedBy(user);
+            notifications.setUser(listAdmin.getFirst());
+            notifications.setCreatedAt(new Date());
+            notifications.setPath(DEVICE_PATH + deviceId.toString());
+            notificationRepository.save(notifications);
+
+            List<String> tokens = listAdmin.stream()
+                    .flatMap(userAd -> userAd.getUserDeviceTokens() != null
+                            ? userAd.getUserDeviceTokens().stream()
+                            : Stream.empty())
+                    .map(DeviceTokens::getToken)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            String batchResponse = notificationService.sendNotification(tokens,
+                    "Tiêu hủy/thanh lý thiết bị", "Một thiết bị đã được tiêu hủy hoặc thanh lý",
+                    "deleteDevice", "new", DEVICE_PATH + deviceId.toString());
+
+            return new DeliveryNoteResponse(deliveryNote.getId());
+        } catch (HandlerException handlerException) {
+            throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DELIVERY_PATH.getPath(), handlerException.getStatus());
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.DELIVERY_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }
