@@ -7,4 +7,6 @@ import lombok.Data;
 public class TokenRefreshRequest {
     @NotBlank
     private String refreshToken;
+
+    private String platform;
 }

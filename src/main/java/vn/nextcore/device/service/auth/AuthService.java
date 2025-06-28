@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.nextcore.device.dto.req.AuthRequest;
 import vn.nextcore.device.dto.req.TokenRefreshRequest;
 import vn.nextcore.device.dto.resp.AuthResponse;
@@ -18,6 +19,7 @@ import vn.nextcore.device.entity.User;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
 import vn.nextcore.device.exception.HandlerException;
+import vn.nextcore.device.repository.DeviceTokensRepository;
 import vn.nextcore.device.repository.UserRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
 import vn.nextcore.device.util.TokenBlackListUtil;
@@ -35,6 +37,9 @@ public class AuthService implements IAuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DeviceTokensRepository deviceTokensRepository;
 
     private final TokenBlackListUtil tokenBlackUtil;
 
@@ -90,8 +95,11 @@ public class AuthService implements IAuthService {
     }
 
     @Override
+    @Transactional
     public void logout(HttpServletRequest request, TokenRefreshRequest refreshToken) {
         try {
+            User user = jwtUtil.extraUserFromRequest(request);
+
             String accessToken = jwtUtil.extraJwtTokenFromRequest(request);
             long accessTokenExpiry = jwtUtil.extractExpiration(accessToken).getTime() - System.currentTimeMillis();
             long refreshTokenExpiry = jwtUtil.extractExpiration(refreshToken.getRefreshToken()).getTime() - System.currentTimeMillis();
@@ -99,6 +107,9 @@ public class AuthService implements IAuthService {
             // add token access and refresh in black list
             tokenBlackUtil.addBlacklistToken(accessToken, accessTokenExpiry);
             tokenBlackUtil.addBlacklistToken(refreshToken.getRefreshToken(), refreshTokenExpiry);
+
+            deviceTokensRepository.deleteDeviceTokensByUserIdAndPlatform(user.getId(), refreshToken.getPlatform());
+
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), PathEnum.LOGIN_PATH.getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

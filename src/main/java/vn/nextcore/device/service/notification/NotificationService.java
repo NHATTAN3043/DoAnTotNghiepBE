@@ -88,7 +88,7 @@ public class NotificationService implements INotificationService {
                 throw new HandlerException(ErrorCodeEnum.ER148.getCode(), ErrorCodeEnum.ER148.getMessage(), "api/save-fcm-token", HttpStatus.BAD_REQUEST);
             }
             DeviceTokens deviceTokensExists = deviceTokensRepository
-                    .findDeviceTokensByUserIdAndDeletedAtIsNull(user.getId());
+                    .findDeviceTokensByUserIdAndPlatformAndDeletedAtIsNull(user.getId(), req.getPlatform());
             if (deviceTokensExists != null) {
                 deviceTokensExists.setToken(req.getToken());
                 deviceTokensExists.setExpired(false);
@@ -98,6 +98,7 @@ public class NotificationService implements INotificationService {
                 deviceTokens.setToken(req.getToken());
                 deviceTokens.setExpired(false);
                 deviceTokens.setUser(user);
+                deviceTokens.setPlatform(req.getPlatform());
                 deviceTokens.setCreatedAt(new Date());
 
                 deviceTokensRepository.save(deviceTokens);
