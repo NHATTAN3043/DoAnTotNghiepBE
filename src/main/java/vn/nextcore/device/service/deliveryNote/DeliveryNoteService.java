@@ -257,7 +257,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             notifications.setTitle("Tiêu hủy/thanh lý thiết bị");
             notifications.setContent("Một thiết bị đã được tiêu hủy hoặc thanh lý");
             notifications.setCreatedBy(user);
-            notifications.setUser(listAdmin.getFirst());
+            notifications.setUser(listAdmin.get(0));
             notifications.setCreatedAt(new Date());
             notifications.setPath(DEVICE_PATH + deviceId.toString());
             notificationRepository.save(notifications);
