@@ -22,7 +22,7 @@ public class BaNextDeviceApplication {
     @Bean
     FirebaseMessaging firebaseMessaging() throws IOException {
         GoogleCredentials googleCredentials = GoogleCredentials.
-                fromStream(new ClassPathResource("nextdevice-2efec-firebase-adminsdk-fbsvc-81fab3a875.json").getInputStream());
+                fromStream(new ClassPathResource("nextdevice-2efec-firebase-adminsdk-fbsvc-7a6d16288e.json").getInputStream());
         FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                 .setCredentials(googleCredentials).build();
         FirebaseApp firebaseApp;
