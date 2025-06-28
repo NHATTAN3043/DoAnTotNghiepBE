@@ -64,3 +64,4 @@ logs/
 
 uploadImgDevice/
 
+src/main/resources/*.json
