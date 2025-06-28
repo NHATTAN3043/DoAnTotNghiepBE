@@ -38,7 +38,6 @@ public class ParseUtils {
 
             if (METHOD_DETAILS.equals(method)) {
                 deviceResponse.setPriceSell(device.getPriceSell() != null ? String.valueOf(device.getPriceSell()) : "");
-                deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
                 if (device.getUsingBy() != null) {
                     deviceResponse.setUsingBy(convertUserToUserResponse(device.getUsingBy()));
@@ -83,10 +82,11 @@ public class ParseUtils {
             }
             deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy().longValue()) : "");
             deviceResponse.setSpecifications(specifications);
-            deviceResponse.setDateBuy(dateFormat.format(device.getDateBuy()));
-            deviceResponse.setDateMaintenance(dateFormat.format(device.getDateMaintenance()));
+            deviceResponse.setDateBuy(device.getDateBuy() != null ? dateFormat.format(device.getDateBuy()) : "");
+            deviceResponse.setDateMaintenance(device.getDateMaintenance() != null ? dateFormat.format(device.getDateMaintenance()) : "");
             deviceResponse.setDescription(device.getDescription());
             deviceResponse.setStatus(device.getStatus());
+            deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
             return deviceResponse;
         } catch (Exception e) {
@@ -342,7 +342,7 @@ public class ParseUtils {
         }
     }
 
-    public static GroupResponse convertGroupToGroupResponse(Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity) {
+    public static GroupResponse convertGroupToGroupResponse(Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity, Integer scraped) {
         try {
             GroupResponse groupResponse = new GroupResponse();
 
@@ -353,6 +353,7 @@ public class ParseUtils {
                 groupResponse.setUsedQuantity(activeQuantity);
                 groupResponse.setStockQuantity(stockQuantity);
                 groupResponse.setMaintenanceQuantity(maintenanceQuantity);
+                groupResponse.setScrapedQuantity(scraped);
             }
 
             return groupResponse;

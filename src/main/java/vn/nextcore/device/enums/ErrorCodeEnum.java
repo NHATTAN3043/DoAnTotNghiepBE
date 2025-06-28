@@ -33,7 +33,7 @@ public enum ErrorCodeEnum {
     ER051("ER051", "Filters contain field {0} not allowed"),
     ER052("ER052", "Filters contain operator not allowed (must be like, eq, gte, lte, between)"),
     ER053("ER053", "Length of filters.values search must > 0 && < 3"),
-    ER054("ER054", "Status must be stock, active or maintenance"),
+    ER054("ER054", "Status must be stock, active, maintenance or scrap"),
     ER055("ER055", "Param filters invalid format"),
     ER056("ER056", "Searching with between then startDate and endDate cannot be empty"),
     ER057("ER057", "deviceId not found"),

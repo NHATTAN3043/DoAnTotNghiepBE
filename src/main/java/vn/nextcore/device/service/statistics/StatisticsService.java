@@ -43,13 +43,16 @@ public class StatisticsService implements IStatisticsService {
             Integer usedDevice = deviceRepository.countDeviceByStatusAndDeletedAtIsNull(Status.DEVICE_ACTIVE.getStatus());
             Integer stockDevice = deviceRepository.countDeviceByStatusAndDeletedAtIsNull(Status.DEVICE_STOCK.getStatus());
             Integer maintenance = deviceRepository.countDeviceByStatusAndDeletedAtIsNull(Status.DEVICE_MAINTENANCE.getStatus());
+            Integer scrap = deviceRepository.countDeviceByStatusAndDeletedAtIsNull(Status.DEVICE_SCRAP.getStatus());
             List<Group> groupList = groupRepository.findAll();
+
             for (Group group : groupList) {
                 Integer stockQuantity = deviceRepository.countDeviceByGroupIdAndStatusAndDeletedAtIsNull(group.getId(), Status.DEVICE_STOCK.getStatus());
                 Integer activeQuantity = deviceRepository.countDeviceByGroupIdAndStatusAndDeletedAtIsNull(group.getId(), Status.DEVICE_ACTIVE.getStatus());
                 Integer maintenanceQuantity = deviceRepository.countDeviceByGroupIdAndStatusAndDeletedAtIsNull(group.getId(), Status.DEVICE_MAINTENANCE.getStatus());
+                Integer scraped = deviceRepository.countDeviceByGroupIdAndStatusAndDeletedAtIsNull(group.getId(), Status.DEVICE_MAINTENANCE.getStatus());
 
-                GroupResponse groupResponse = ParseUtils.convertGroupToGroupResponse(group, activeQuantity, stockQuantity, maintenanceQuantity);
+                GroupResponse groupResponse = ParseUtils.convertGroupToGroupResponse(group, activeQuantity, stockQuantity, maintenanceQuantity, scraped);
                 result.getGroupStatistics().add(groupResponse);
             }
 
@@ -57,6 +60,7 @@ public class StatisticsService implements IStatisticsService {
             result.setTotalUsed(usedDevice);
             result.setTotalStock(stockDevice);
             result.setTotalMaintenance(maintenance);
+            result.setTotalScrap(scrap);
             return result;
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.STATISTICS_PATH.getPath(), handlerException.getStatus());

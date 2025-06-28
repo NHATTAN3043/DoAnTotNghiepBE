@@ -46,6 +46,9 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     private UserRepository userRepository;
 
     @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
     private JwtUtil jwtUtil;
     private static final String ALLOCATE = "allocate";
     private static final String RETRIEVE = "retrieve";
@@ -137,25 +140,30 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             }
             deliveryNote.setNoteDevices(noteDevices);
             deliveryNoteRepository.save(deliveryNote);
-            // save notification
-            Notifications notifications = new Notifications();
-            notifications.setTitle("Xử lý yêu cầu");
-            notifications.setContent(user.getUserName() + " đã xử lý yêu cầu của bạn");
-            notifications.setCreatedBy(user);
-            notifications.setUser(deliveryNote.getRequest().getCreatedBy());
-            notifications.setCreatedAt(new Date());
-            notifications.setPath(EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
-            notificationRepository.save(notifications);
 
-            List<String> tokens = deliveryNote.getRequest().getCreatedBy()
-                    .getUserDeviceTokens()
-                    .stream()
-                    .map(DeviceTokens::getToken)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            String batchResponse = notificationService.sendNotification(tokens,
-                    "Xử lý yêu cầu", user.getUserName() + " đã xử lý yêu cầu của bạn",
-                    "addDeliveryNote", "new", EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
+            if (!user.getId().equals(deliveryNote.getRequest().getCreatedBy().getId())) {
+                // save notification
+                Notifications notifications = new Notifications();
+                notifications.setTitle("Xử lý yêu cầu");
+                notifications.setContent(user.getUserName() + " đã xử lý yêu cầu của bạn");
+                notifications.setCreatedBy(user);
+                notifications.setUser(deliveryNote.getRequest().getCreatedBy());
+                notifications.setCreatedAt(new Date());
+                notifications.setPath(EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
+                notificationRepository.save(notifications);
+
+
+                List<String> tokens = deliveryNote.getRequest().getCreatedBy()
+                        .getUserDeviceTokens()
+                        .stream()
+                        .map(DeviceTokens::getToken)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                String batchResponse = notificationService.sendNotification(tokens,
+                        "Xử lý yêu cầu", user.getUserName() + " đã xử lý yêu cầu của bạn",
+                        "addDeliveryNote", "new", EMPLOYEE_DETAIL_REQUEST_PATH + deliveryNote.getRequest().getId());
+
+            }
 
             return new DeliveryNoteResponse(deliveryNote.getId());
         } catch (HandlerException handlerException) {
@@ -198,6 +206,7 @@ public class DeliveryNoteService implements IDeliveryNoteService {
     }
 
     @Override
+    @Transactional
     public DeliveryNoteResponse createScrapDeliveryNote(HttpServletRequest httpRequest, DeliveryNoteRequest request) {
         try {
             Long deviceId = 0L;
@@ -215,18 +224,28 @@ public class DeliveryNoteService implements IDeliveryNoteService {
             List<NoteDevice> noteDevices = new ArrayList<>();
             for (NoteDeviceRequest note : request.getNoteDeviceRequests()) {
                 NoteDevice noteDevice = new NoteDevice();
-                noteDevice.setDescriptionDevice(note.getDescriptionDevice());
                 Device device = deviceRepository.findDeviceById(note.getDeviceId());
-                device.setUsingBy(null);
-                device.setStatus(Status.ACTION_SCRAP.getStatus());
-                deviceId = device.getId();
+                if (device != null) {
+                    noteDevice.setDescriptionDevice(note.getDescriptionDevice());
+                    device.setUsingBy(null);
+                    device.setStatus(Status.DEVICE_SCRAP.getStatus());
+                    if (request.getDateSell() != null) {
+                        device.setDateSell(dateFormat.parse(request.getDateSell()));
+                    }
+                    deviceId = device.getId();
 
-                if (request.getPriceSell() != null && !request.getPriceSell().isEmpty()) {
-                    device.setPriceSell(Double.parseDouble(request.getPriceSell()));
+                    Group group = groupRepository.findGroupById(device.getGroup().getId());
+                    group.setQuantity(group.getQuantity() - 1);
+                    groupRepository.save(group);
+
+                    if (request.getPriceSell() != null && !request.getPriceSell().isEmpty()) {
+                        device.setPriceSell(Double.parseDouble(request.getPriceSell()));
+                    }
+                    noteDevice.setDevice(device);
+                    noteDevice.setDeliveryNote(deliveryNote);
+                    noteDevices.add(noteDevice);
                 }
-                noteDevice.setDevice(device);
-                noteDevice.setDeliveryNote(deliveryNote);
-                noteDevices.add(noteDevice);
+
             }
             deliveryNote.setNoteDevices(noteDevices);
             deliveryNoteRepository.save(deliveryNote);

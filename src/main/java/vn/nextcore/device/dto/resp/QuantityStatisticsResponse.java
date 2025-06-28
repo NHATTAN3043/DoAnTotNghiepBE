@@ -16,6 +16,7 @@ public class QuantityStatisticsResponse {
     private Integer totalUsed;
     private Integer totalStock;
     private Integer totalMaintenance;
+    private Integer totalScrap;
 
     List<GroupResponse> groupStatistics = new ArrayList<>();
 }

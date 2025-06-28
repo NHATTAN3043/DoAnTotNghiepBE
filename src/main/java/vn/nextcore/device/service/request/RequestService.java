@@ -238,14 +238,16 @@ public class RequestService implements IRequestService {
 
             boolean isApproved = Status.REQUEST_APPROVED.getStatus().equals(data.getStatus());
 
-            List<User> userRequest = new ArrayList<>();
-            userRequest.add(request1.getCreatedBy());
-            List<String> userTokens = getTokensFromUserAndSaveNotification(userRequest, "Phê duyệt yêu cầu", isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn", user, EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
-            String res = notificationService.sendNotification(userTokens,
-                    "Phê duyệt yêu cầu",
-                    isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn",
-                    "approvedRequest", "new",
-                    EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
+            if (request1.getCreatedBy().getRole().getId() == 2L) {
+                List<User> userRequest = new ArrayList<>();
+                userRequest.add(request1.getCreatedBy());
+                List<String> userTokens = getTokensFromUserAndSaveNotification(userRequest, "Phê duyệt yêu cầu", isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn", user, EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
+                String res = notificationService.sendNotification(userTokens,
+                        "Phê duyệt yêu cầu",
+                        isApproved ? user.getUserName() + " đã phê duyệt yêu cầu của bạn" : user.getUserName() + " đã từ chối yêu cầu của bạn",
+                        "approvedRequest", "new",
+                        EMPLOYEE_DETAIL_REQUEST_PATH + data.getId());
+            }
 
             if (isApproved == true) {
                 List<User> listBackOffice = userRepository.findAllByRoleIdAndDeletedAtIsNull(Long.parseLong("1"));

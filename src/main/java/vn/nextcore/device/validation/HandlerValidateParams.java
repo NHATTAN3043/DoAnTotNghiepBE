@@ -13,7 +13,7 @@ public class HandlerValidateParams {
     private static final String REGEX_ORD = "^(asc|desc)$";
     private static final String REGEX_INT = "^[0-9]\\d*$";
     private static final String REGEX_POSITIVE_INT = "^[1-9]\\d*$";
-    private static final String REGEX_STATUS = "^(stock|active|maintenance)$";
+    private static final String REGEX_STATUS = "^(stock|active|maintenance|scrap)$";
     private static final String REGEX_DATE_FORMAT = "^\\d{2}/\\d{2}/\\d{4}$";
     private static final String REGEX_OTP = "^\\d{6}$";
     private static final String REGEX_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";

@@ -24,7 +24,9 @@ public class GroupResponse {
 
     private Integer stockQuantity;
 
-    private Integer MaintenanceQuantity;
+    private Integer maintenanceQuantity;
+
+    private Integer scrapedQuantity;
 
     private List<DeviceResponse> devices = new ArrayList<>();
 }

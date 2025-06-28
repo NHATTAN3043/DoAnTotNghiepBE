@@ -22,6 +22,8 @@ public class DeliveryNoteRequest {
 
     private String priceSell;
 
+    private String dateSell;
+
     private List<NoteDeviceRequest> noteDeviceRequests;
 
 }
