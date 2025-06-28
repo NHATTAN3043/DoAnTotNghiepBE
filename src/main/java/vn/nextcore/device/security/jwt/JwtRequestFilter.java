@@ -19,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import vn.nextcore.device.dto.resp.ErrorResponse;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.exception.HandlerException;
-import vn.nextcore.device.util.TokenBlackListUtil;
 
 import java.io.IOException;
 
@@ -30,12 +29,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
-    private final TokenBlackListUtil tokenBlacklistUtil;
-
-    public JwtRequestFilter(TokenBlackListUtil tokenBlacklistUtil) {
-        this.tokenBlacklistUtil = tokenBlacklistUtil;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -48,9 +41,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String jwt = jwtUtil.extraJwtTokenFromRequest(request);
         String email;
         try {
-            if (jwt != null && tokenBlacklistUtil.isTokenBlacklisted(jwt)) {
-                throw new HandlerException(ErrorCodeEnum.ER101.getCode(), ErrorCodeEnum.ER101.getMessage());
-            }
 
             email = jwt != null ? jwtUtil.extractEmail(jwt) : null;
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

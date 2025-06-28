@@ -22,7 +22,6 @@ import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.DeviceTokensRepository;
 import vn.nextcore.device.repository.UserRepository;
 import vn.nextcore.device.security.jwt.JwtUtil;
-import vn.nextcore.device.util.TokenBlackListUtil;
 
 @Service
 public class AuthService implements IAuthService {
@@ -40,12 +39,6 @@ public class AuthService implements IAuthService {
 
     @Autowired
     private DeviceTokensRepository deviceTokensRepository;
-
-    private final TokenBlackListUtil tokenBlackUtil;
-
-    public AuthService(TokenBlackListUtil tokenBlackUtil) {
-        this.tokenBlackUtil = tokenBlackUtil;
-    }
 
     public AuthResponse loginWithEmailAndPassword(AuthRequest authRequest) {
         AuthResponse authResponse = new AuthResponse();
@@ -85,9 +78,6 @@ public class AuthService implements IAuthService {
             throw new HandlerException(ErrorCodeEnum.ER100.getCode(), ErrorCodeEnum.ER100.getMessage(), PathEnum.REFRESH_TOKEN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
         }
 
-        if (tokenBlackUtil.isTokenBlacklisted(request.getRefreshToken())) {
-            throw new HandlerException(ErrorCodeEnum.ER100.getCode(), ErrorCodeEnum.ER100.getMessage(), PathEnum.REFRESH_TOKEN_PATH.getPath(), HttpStatus.UNAUTHORIZED);
-        }
         String newAccessToken = jwtUtil.refreshAccessToken(request.getRefreshToken());
         reTokenResponse.setAccessToken(newAccessToken);
         reTokenResponse.setExpireIn(jwtExpirationMs);
@@ -99,15 +89,6 @@ public class AuthService implements IAuthService {
     public void logout(HttpServletRequest request, TokenRefreshRequest refreshToken) {
         try {
             User user = jwtUtil.extraUserFromRequest(request);
-
-            String accessToken = jwtUtil.extraJwtTokenFromRequest(request);
-            long accessTokenExpiry = jwtUtil.extractExpiration(accessToken).getTime() - System.currentTimeMillis();
-            long refreshTokenExpiry = jwtUtil.extractExpiration(refreshToken.getRefreshToken()).getTime() - System.currentTimeMillis();
-
-            // add token access and refresh in black list
-            tokenBlackUtil.addBlacklistToken(accessToken, accessTokenExpiry);
-            tokenBlackUtil.addBlacklistToken(refreshToken.getRefreshToken(), refreshTokenExpiry);
-
             deviceTokensRepository.deleteDeviceTokensByUserIdAndPlatform(user.getId(), refreshToken.getPlatform());
 
         } catch (Exception e) {
