@@ -6,18 +6,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "note_devices")
+@Table(name = "GHICHUTHIETBI")
 public class NoteDevice {
-    public static final String ID = "id";
-    public static final String DESCRIPTION_DEVICE = "description_device";
-    public static final String PRICE_DEVICE = "price_device";
-    public static final String DELIVERY_NOTE_ID = "delivery_note_id";
-    public static final String DEVICE_ID = "device_id";
+    public static final String ID = "maGCTB";
+    public static final String DESCRIPTION_DEVICE = "moTaTrangThaiTB";
+    public static final String PRICE_DEVICE = "soTienGhiChu";
+    public static final String DELIVERY_NOTE_ID = "maLSTB";
+    public static final String DEVICE_ID = "maThietBi";
+    public static final String DATE_NOTE = "ngayGhiChu";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +32,9 @@ public class NoteDevice {
 
     @Column(name = PRICE_DEVICE)
     private Double priceDevice;
+
+    @Column(name = DATE_NOTE)
+    private Date dateNote;
 
     @ManyToOne
     @JoinColumn(name = DELIVERY_NOTE_ID)

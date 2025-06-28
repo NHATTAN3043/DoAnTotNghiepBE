@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -13,13 +14,16 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "providers")
+@Table(name = "NHACUNGCAP")
 public class Provider {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String ADDRESS = "address";
-    public static final String PHONE_NUMBER = "phone_number";
+    public static final String ID = "maNhaCungCap";
+    public static final String NAME = "tenNhaCungCap";
+    public static final String ADDRESS = "diaChi";
+    public static final String PHONE_NUMBER = "soDienThoai";
     public static final String PROVIDER = "provider";
+    public static final String UPDATED_AT = "updated_at";
+    public static final String CREATED_AT = "created_at";
+    public static final String DELETED_AT = "deleted_at";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +38,15 @@ public class Provider {
 
     @Column(name = PHONE_NUMBER)
     private String phoneNumber;
+
+    @Column(name = UPDATED_AT)
+    private Date updatedAt;
+
+    @Column(name = CREATED_AT)
+    private Date createdAt;
+
+    @Column(name = DELETED_AT)
+    private Date deletedAt;
 
     // relationship of devices
     @OneToMany(mappedBy = PROVIDER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)

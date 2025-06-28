@@ -17,11 +17,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "groups")
+@Table(name = "LOAI")
 public class Group {
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String QUANTITY = "quantity";
+    public static final String ID = "maLoai";
+    public static final String NAME = "tenLoai";
+    public static final String QUANTITY = "soLuong";
     public static final String GROUP = "group";
 
     @Id

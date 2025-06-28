@@ -17,6 +17,8 @@ public class DeviceResponse {
 
     private String priceSell;
 
+    private String status;
+
     private String description;
 
     private String groupName;
@@ -29,13 +31,19 @@ public class DeviceResponse {
 
     private String dateMaintenance;
 
+    private Boolean isBroken;
+
     private GroupResponse group;
 
     private ProviderResponse provider;
 
     private List<ImageResponse> images = null;
 
-    private List<SpecificationResponse> specifications = null;
+    private List<SpecificationResponse> specifications;
+
+    private List<NoteDeviceResponse> noteDeviceResponses;
 
     private String image;
+
+    private UserResponse usingBy;
 }

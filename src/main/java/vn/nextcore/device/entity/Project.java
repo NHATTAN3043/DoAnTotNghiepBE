@@ -13,10 +13,10 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "projects")
+@Table(name = "DUAN")
 public class Project {
-    public static final String ID = "id";
-    public static final String PROJECT_NAME = "project_name";
+    public static final String ID = "maDuAn";
+    public static final String PROJECT_NAME = "tenDuAn";
     public static final String PROJECT = "project";
 
     @Id

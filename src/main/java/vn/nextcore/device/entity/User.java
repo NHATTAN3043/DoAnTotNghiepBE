@@ -18,23 +18,27 @@ import java.util.HashSet;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "NGUOIDUNG")
 public class User {
-    public static final String ID = "id";
-    public static final String NAME = "name";
+    public static final String ID = "maNguoiDung";
+    public static final String NAME = "ten";
     public static final String EMAIL = "email";
-    public static final String PHONE_NUMBER = "phone_number";
-    public static final String GENDER = "gender";
-    public static final String DATE_OF_BIRTH = "date_of_birth";
-    public static final String ADDRESS = "address";
-    public static final String AVATAR_URL = "avatar_url";
-    public static final String INFO_CV = "info_cv";
-    public static final String PASSWORD = "password";
-    public static final String ROLE_ID = "role_id";
+    public static final String PHONE_NUMBER = "soDienThoai";
+    public static final String GENDER = "gioiTinh";
+    public static final String DATE_OF_BIRTH = "ngaySinh";
+    public static final String ADDRESS = "diaChi";
+    public static final String AVATAR_URL = "anhDaiDien";
+    public static final String PASSWORD = "matKhau";
+    public static final String ROLE_ID = "maChucVu";
+    public static final String DEPARTMENT_ID = "maPhongBan";
     public static final String USER = "user";
     public static final String CREATED_BY = "createdBy";
+    public static final String USING_BY = "usingBy";
     public static final String USER_ASSIGNED = "userAssigned";
     public static final String APPROVER = "approver";
+    public static final String UPDATED_AT = "updated_at";
+    public static final String CREATED_AT = "created_at";
+    public static final String DELETED_AT = "deleted_at";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,7 +54,7 @@ public class User {
     @Column(name = PHONE_NUMBER, length = 20)
     private String phoneNumber;
 
-    @Column(name = GENDER, nullable = false)
+    @Column(name = GENDER)
     private String gender;
 
     @Column(name = DATE_OF_BIRTH)
@@ -62,24 +66,37 @@ public class User {
     @Column(name = AVATAR_URL, length = 500)
     private String avatarUrl;
 
-    @Column(name = INFO_CV, length = 500)
-    private String infoCVUrl;
-
-    @Column(name = PASSWORD)
+    @Column(name = PASSWORD, nullable = false)
     @Size(min = 6, max = 500)
     private String password;
+
+    @Column(name = UPDATED_AT)
+    private Date updatedAt;
+
+    @Column(name = CREATED_AT)
+    private Date createdAt;
+
+    @Column(name = DELETED_AT)
+    private Date deletedAt;
 
     @ManyToOne
     @JoinColumn(name = ROLE_ID)
     private Role role;
 
+    @ManyToOne
+    @JoinColumn(name = DEPARTMENT_ID)
+    private Department department;
+
     // relationship of user projects
-    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<UserProject> userProjects = new ArrayList<>();
 
     // relationship of device
     @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Device> devices = new ArrayList<>();
+
+    @OneToMany(mappedBy = USING_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Device> devicesUsing = new ArrayList<>();
 
     // relationship of request
     @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -98,4 +115,18 @@ public class User {
     //relationship of forgot_password
     @OneToOne(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ForgotPassword forgotPassword;
+
+    // relationship of notifications
+    @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> CreatedByOfNotifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> userNotifications = new ArrayList<>();
+
+    // relationship of deviceTokens
+    @OneToMany(mappedBy = CREATED_BY, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DeviceTokens> CreatedByOfDeviceTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DeviceTokens> userDeviceTokens = new ArrayList<>();
 }

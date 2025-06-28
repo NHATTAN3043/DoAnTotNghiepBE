@@ -13,10 +13,10 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "roles")
+@Table(name = "CHUCVU")
 public class Role {
-    public static final String ID = "id";
-    public static final String NAME = "name";
+    public static final String ID = "maChucVu";
+    public static final String NAME = "tenChucVu";
     public static final String ROLE = "role";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

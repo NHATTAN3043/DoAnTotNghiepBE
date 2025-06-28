@@ -3,11 +3,12 @@ package vn.nextcore.device.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,9 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import vn.nextcore.device.dto.resp.ErrorResponse;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
@@ -26,7 +24,6 @@ import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.security.jwt.JwtRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 @Configuration
@@ -38,10 +35,15 @@ public class SecurityConfig {
         try {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
+            .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-                            "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**").permitAll()
+                            "/images/**", "/api/forgotPassword/verifyMail/**", "/api/forgotPassword/verifyOtp/**", "/ws/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/device/*", "/api/user/**").permitAll()
+                    .requestMatchers("/api/request/**", "/api/group/**", "/api/project", "/api/user/getMe", "/api/user/getDepartment", "/api/user/update-profile/**", "/api/user/change-password", "/api/delivery/**").hasAnyAuthority("Employee", "Back Office", "Manager")
+                    .requestMatchers("/api/device/**", "/api/specification/**", "/api/provider/**", "/api/statistics/**").hasAnyAuthority("Back Office", "Manager")
+                    .requestMatchers("/api/user/**", "/api/department/**").hasAuthority("Manager")
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling

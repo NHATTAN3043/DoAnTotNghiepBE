@@ -12,7 +12,7 @@ import vn.nextcore.device.service.specification.ISpecificationService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/specification")
+@RequestMapping("/api/specification")
 public class SpecificationController {
     @Autowired
     private ISpecificationService specificationService;

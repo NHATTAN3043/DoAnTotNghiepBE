@@ -15,20 +15,20 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "delivery_notes")
+@Table(name = "LICHSUTHIETBI")
 public class DeliveryNote {
-    public static final String ID = "id";
-    public static final String TITLE = "title";
-    public static final String DELIVERY_DATE = "delivery_date";
-    public static final String TYPE_NOTE = "type_note";
-    public static final String DESCRIPTION = "description";
-    public static final String IS_CONFIRM = "is_confirm";
+    public static final String ID = "maLSTB";
+    public static final String TITLE = "tieuDe";
+    public static final String DELIVERY_DATE = "thoiGianNhan";
+    public static final String TYPE_NOTE = "loaiHanhDong";
+    public static final String DESCRIPTION = "moTa";
+    public static final String IS_CONFIRM = "daXacNhan";
     public static final String CREATED_AT = "created_at";
     public static final String UPDATE_AT = "updated_at";
     public static final String DELETED_AT = "deleted_at";
-    public static final String REQUEST_ID = "request_id";
-    public static final String CREATED_BY = "created_by";
-    public static final String PROVIDER_ID = "provider_id";
+    public static final String REQUEST_ID = "maYeuCau";
+    public static final String CREATED_BY = "maNguoiTao";
+    public static final String PROVIDER_ID = "maNhaCungCap";
     public static final String DELIVERY_NOTE = "deliveryNote";
 
     @Id
@@ -62,7 +62,7 @@ public class DeliveryNote {
 
     // relationship of request
     @ManyToOne
-    @JoinColumn(name = REQUEST_ID, nullable = false)
+    @JoinColumn(name = REQUEST_ID)
     private Request request;
 
     // relationship of user

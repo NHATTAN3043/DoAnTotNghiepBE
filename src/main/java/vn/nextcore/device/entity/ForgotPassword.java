@@ -12,12 +12,12 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-@Table(name = "forgot_password")
+@Table(name = "OTP")
 public class ForgotPassword {
-    public static final String ID = "id";
+    public static final String ID = "ma";
     public static final String OTP = "otp";
-    public static final String EXP = "expiration_time";
-    public static final String USER_ID = "user_id";
+    public static final String EXP = "thoiHanOTP";
+    public static final String USER_ID = "maNguoiDung";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +31,6 @@ public class ForgotPassword {
     private Date expirationTime;
 
     @OneToOne
-    @JoinColumn(name = USER_ID, referencedColumnName = ID)
+    @JoinColumn(name = USER_ID, referencedColumnName = USER_ID)
     private User user;
 }

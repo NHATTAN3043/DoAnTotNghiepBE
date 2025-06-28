@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 
 import java.util.HashMap;
@@ -64,6 +63,29 @@ public class GlobalExceptionHandler {
         errorMap.put("ER058", "deviceId must be positive integer");
         errorMap.put("ER113", "repeatPassword not blank");
         errorMap.put("ER114", "password length must be > = 8 and <= 50 char");
+        errorMap.put("ER115", "Name provider not blank");
+        errorMap.put("ER116", "Phone provider not blank");
+        errorMap.put("ER117", "Phone provider invalid");
+        errorMap.put("ER118", "Address provider not blank");
+        errorMap.put("ER119", "name provider max length 250");
+        errorMap.put("ER120", "address provider max length 250");
+        errorMap.put("ER121", "Title not blank");
+        errorMap.put("ER122", "Description not blank");
+        errorMap.put("ER123", "projectId not blank");
+        errorMap.put("ER124", "requestDevices not blank");
+        errorMap.put("ER125", "groupId invalid");
+        errorMap.put("ER126", "quantity invalid");
+        errorMap.put("ER127", "createdDate invalid");
+        errorMap.put("ER128", "approvedDate invalid");
+        errorMap.put("ER129", "status must in pending|approved|done");
+        errorMap.put("ER130", "Offset must >= 0");
+        errorMap.put("ER131", "Limit must >= 1");
+        errorMap.put("ER132", "sortCreatedDate must in desc|asc");
+        errorMap.put("ER133", "sortApprovedDate must in desc|asc");
+        errorMap.put("ER134", "type not exists");
+        errorMap.put("ER136", "phone number not blank");
+        errorMap.put("ER137", "roleId not blank");
+        errorMap.put("ER138", "departmentId not blank");
     }
 
     @ExceptionHandler(HandlerException.class)
@@ -177,4 +199,5 @@ public class GlobalExceptionHandler {
         errorResponse.setPath(path);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
 }

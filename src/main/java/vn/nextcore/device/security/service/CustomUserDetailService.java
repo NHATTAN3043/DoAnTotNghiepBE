@@ -2,6 +2,7 @@ package vn.nextcore.device.security.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +12,7 @@ import vn.nextcore.device.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class CustomUserDetailService implements UserDetailsService {
@@ -24,7 +26,8 @@ public class CustomUserDetailService implements UserDetailsService {
             throw new UsernameNotFoundException("Email not found!");
         } else {
             // set role here
-            Collection<GrantedAuthority> authorities = Collections.emptyList();
+            String roleName = user.getRole().getName();
+            Collection<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
             return new org.springframework.security.core.userdetails.User(
                     user.getEmail(),
                     user.getPassword(),

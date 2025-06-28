@@ -17,6 +17,7 @@ import vn.nextcore.device.dto.resp.ListDeviceResponse;
 import vn.nextcore.device.entity.*;
 import vn.nextcore.device.enums.ErrorCodeEnum;
 import vn.nextcore.device.enums.PathEnum;
+import vn.nextcore.device.enums.Status;
 import vn.nextcore.device.exception.HandlerException;
 import vn.nextcore.device.repository.*;
 import vn.nextcore.device.security.jwt.JwtUtil;
@@ -74,13 +75,15 @@ public class DeviceService implements IDeviceService {
     @Value("${file.types}")
     private String[] VALID_IMAGE_TYPES;
 
-    private List<String> allowedFields = Arrays.asList("name", "groupId", "providerId", "dateBuy", "dateMaintenance");
+    private List<String> allowedFields = Arrays.asList("name", "groupId", "providerId", "dateBuy", "dateMaintenance", "usingBy");
 
     private final String STATUS_STOCK = "stock";
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     private int MAX_SIZE_IMAGES_UPLOAD = 5;
+
+    private static String METHOD_DETAILS = "details";
 
     @Override
     public DeviceResponse getInfoDevice(String id) {
@@ -92,7 +95,7 @@ public class DeviceService implements IDeviceService {
             if (deviceExists == null)
                 throw new HandlerException(ErrorCodeEnum.ER057.getCode(), ErrorCodeEnum.ER057.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
 
-            DeviceResponse result = ParseUtils.convertDeviceToDeviceRes(deviceExists, "infoUpdate");
+            DeviceResponse result = ParseUtils.convertDeviceToDeviceRes(deviceExists, METHOD_DETAILS);
             return result;
         } catch (HandlerException handlerException) {
             throw new HandlerException(handlerException.getCode(), handlerException.getMessage(), PathEnum.DEVICE_PATH.getPath(), handlerException.getStatus());
@@ -133,16 +136,10 @@ public class DeviceService implements IDeviceService {
 
             // Decode and validate filters
             List<FilterRequest> filters = validateFilters(allParams);
-
             // Query devices
             ListDeviceResponse result = deviceCriteriaRepository.listDeviceCriteria(
                     status, ordDateBuy, ordDateMaintenance, Integer.valueOf(offset), Integer.valueOf(limit), filters
             );
-
-            // Check for empty results
-            if (result.getTotalRecords() == 0) {
-                throw new HandlerException(ErrorCodeEnum.ER043.getCode(), ErrorCodeEnum.ER043.getMessage(), HttpStatus.NOT_FOUND);
-            }
 
             return result;
         } catch (HandlerException handlerException) {
@@ -172,7 +169,7 @@ public class DeviceService implements IDeviceService {
             newDevice.setCreatedBy(user);
 
             // add provider
-            Provider provider = providerRepository.findProviderById(Long.valueOf(deviceRequest.getProviderId()));
+            Provider provider = providerRepository.findProviderByIdAndDeletedAtIsNull(Long.valueOf(deviceRequest.getProviderId()));
             newDevice.setProvider(provider);
 
             // add set specification
@@ -190,11 +187,12 @@ public class DeviceService implements IDeviceService {
                 // check files image
                 CheckFilesValid(images, images.length);
 
-                Set<Image> imageSet = processImages(images, newDevice);
-                newDevice.setImages(imageSet);
+                List<Image> ListImages = processImages(images, newDevice);
+                newDevice.setImages(ListImages);
             }
 
             newDevice.setStatus(STATUS_STOCK);
+            newDevice.setIsBroken(false);
             newDevice.setCreatedAt(new Date());
             deviceRepository.save(newDevice);
 
@@ -218,7 +216,7 @@ public class DeviceService implements IDeviceService {
     @Transactional(rollbackFor = {JsonProcessingException.class, IOException.class, Exception.class, HandlerException.class})
     public DeviceResponse updateDevice(String id, DeviceRequest deviceRequest, String specificationJson, MultipartFile[] images, String imagesDelete, String specificationDelete) {
         DeviceResponse deviceResponse = new DeviceResponse();
-        Set<Long> imagesRequestDelete = new HashSet<>();
+        Set<Long> imagesRequestDelete = new LinkedHashSet<>();
         try {
             // validate deviceId
             HandlerValidateParams.validatePositiveInt(id, ErrorCodeEnum.ER058);
@@ -228,11 +226,15 @@ public class DeviceService implements IDeviceService {
                 throw new HandlerException(ErrorCodeEnum.ER057.getCode(), ErrorCodeEnum.ER057.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
             }
 
+            if (!Status.DEVICE_STOCK.getStatus().equals(deviceExists.getStatus())) {
+                throw new HandlerException(ErrorCodeEnum.ER145.getCode(), ErrorCodeEnum.ER145.getMessage(), PathEnum.DEVICE_PATH.getPath(), HttpStatus.NOT_FOUND);
+            }
+
             // set info normal of device
             setInfoDevice(deviceRequest, deviceExists);
             updateGroupInfo(deviceRequest.getGroupId(), deviceExists);
 
-            Provider newProvider = providerRepository.findProviderById(Long.valueOf(deviceRequest.getProviderId()));
+            Provider newProvider = providerRepository.findProviderByIdAndDeletedAtIsNull(Long.valueOf(deviceRequest.getProviderId()));
             deviceExists.setProvider(newProvider);
 
             // handle specification delete
@@ -256,8 +258,8 @@ public class DeviceService implements IDeviceService {
                 int quantityImagesOfDevice = imageRepository.countByDeviceId(Long.valueOf(id));
                 CheckFilesValid(images, quantityImagesOfDevice + images.length - imagesRequestDelete.size());
 
-                Set<Image> imageSet = processImages(images, deviceExists);
-                deviceExists.setImages(imageSet);
+                List<Image> listImages = processImages(images, deviceExists);
+                deviceExists.setImages(listImages);
             }
 
             deviceExists.setUpdatedAt(new Date());
@@ -290,7 +292,22 @@ public class DeviceService implements IDeviceService {
         Set<SpecificationRequest> specificationRequestSet = JsonUtils.parseJsonToSet(specificationJson, new TypeReference<Set<SpecificationRequest>>() {
         }, ErrorCodeEnum.ER062);
         Set<Specification> specificationsAdd = addInfoSpecification(specificationRequestSet);
-        specificationsAdd.forEach(device::addSpecification);
+
+        for (Specification spec : specificationsAdd) {
+            if (!checkSpecificationExistsInDevice(device, spec.getId())) {
+                device.getSpecifications().add(spec);
+            }
+        }
+//        specificationsAdd.forEach(device::addSpecification);
+    }
+
+    private boolean checkSpecificationExistsInDevice(Device device, Long specificationId) {
+        if (device == null || device.getSpecifications().isEmpty() || specificationId == null) {
+            return false;
+        } else {
+            return device.getSpecifications().stream()
+                    .anyMatch(spec -> specificationId.equals(spec.getId()));
+        }
     }
 
     private void deleteSpecifications(String specificationDelete, Device device) throws JsonProcessingException {
@@ -406,7 +423,7 @@ public class DeviceService implements IDeviceService {
 
     // validate value in filters
     private void validateFilterValues(FilterRequest filter) {
-        if (filter.getValues().size() > 2 || filter.getValues().isEmpty()) {
+        if ((filter.getValues().size() > 2 && !"groupId".equals(filter.getField())) || filter.getValues().isEmpty()) {
             throw new HandlerException(ErrorCodeEnum.ER053.getCode(), ErrorCodeEnum.ER053.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
@@ -468,8 +485,8 @@ public class DeviceService implements IDeviceService {
     }
 
     // handle save files image
-    private Set<Image> processImages(MultipartFile[] images, Device device) throws IOException {
-        Set<Image> imageSet = new HashSet<>();
+    private List<Image> processImages(MultipartFile[] images, Device device) throws IOException {
+        List<Image> imageSet = new ArrayList<>();
 
         for (MultipartFile image : images) {
             // upload image
