@@ -36,6 +36,8 @@ public class UserResponse {
 
     private List<DeviceResponse> deviceResponseList = new ArrayList<>();
 
+    private List<ProjectResponse> projects = new ArrayList<>();
+
     public UserResponse(Long id, String userName, String email, String avatarUrl) {
         this.id = id;
         this.userName = userName;

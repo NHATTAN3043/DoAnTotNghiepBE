@@ -11,16 +11,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema
-public class NoteDeviceResponse {
-    private Long noteDeviceId;
+public class NotificationResponse {
+    private Long id;
 
-    private String descriptionDevice;
+    private String title;
 
-    private Double priceMaintenance;
+    private String content;
 
-    private DeliveryNoteResponse deliveryNoteResponse;
+    private String createdAt;
 
-    private DeviceResponse device;
+    private UserResponse createdBy;
 
-    private String appointmentDate;
+    private Boolean read;
+
+    private String path;
+
 }

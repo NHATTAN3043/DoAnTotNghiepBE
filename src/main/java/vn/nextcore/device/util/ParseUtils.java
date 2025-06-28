@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
 public class ParseUtils {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm - dd/MM/yyyy");
@@ -36,9 +37,7 @@ public class ParseUtils {
             }
 
             if (METHOD_DETAILS.equals(method)) {
-                deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy().longValue()) : "");
                 deviceResponse.setPriceSell(device.getPriceSell() != null ? String.valueOf(device.getPriceSell()) : "");
-                deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
                 if (device.getUsingBy() != null) {
                     deviceResponse.setUsingBy(convertUserToUserResponse(device.getUsingBy()));
@@ -46,7 +45,7 @@ public class ParseUtils {
 
                 deviceResponse.setGroup(convertGroupToGroupResponse(device.getGroup()));
 
-                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider(), false));
+                deviceResponse.setProvider(convertProviderToProviderResponse(device.getProvider(), true));
 
                 List<ImageResponse> images = new ArrayList<>();
                 if (device.getImages() != null) {
@@ -63,7 +62,7 @@ public class ParseUtils {
 
                 List<NoteDeviceResponse> noteDeviceResponses = new ArrayList<>();
 
-                for (NoteDevice noteDevice: sortedNoteDevices) {
+                for (NoteDevice noteDevice : sortedNoteDevices) {
                     NoteDeviceResponse noteDeviceResponse = new NoteDeviceResponse();
                     noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
                     noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
@@ -81,11 +80,13 @@ public class ParseUtils {
                         new SpecificationResponse(specification.getId(), specification.getName(), specification.getValue())
                 ).collect(Collectors.toList());
             }
+            deviceResponse.setPriceBuy(device.getPriceBuy() != null ? String.valueOf(device.getPriceBuy().longValue()) : "");
             deviceResponse.setSpecifications(specifications);
-            deviceResponse.setDateBuy(dateFormat.format(device.getDateBuy()));
-            deviceResponse.setDateMaintenance(dateFormat.format(device.getDateMaintenance()));
+            deviceResponse.setDateBuy(device.getDateBuy() != null ? dateFormat.format(device.getDateBuy()) : "");
+            deviceResponse.setDateMaintenance(device.getDateMaintenance() != null ? dateFormat.format(device.getDateMaintenance()) : "");
             deviceResponse.setDescription(device.getDescription());
             deviceResponse.setStatus(device.getStatus());
+            deviceResponse.setDateSell(device.getDateSell() != null ? dateFormat.format(device.getDateSell()) : "");
 
             return deviceResponse;
         } catch (Exception e) {
@@ -156,6 +157,9 @@ public class ParseUtils {
                             noteDeviceResponse.setNoteDeviceId(noteDevice.getId());
                             noteDeviceResponse.setDescriptionDevice(noteDevice.getDescriptionDevice());
                             noteDeviceResponse.setPriceMaintenance(noteDevice.getPriceDevice());
+                            if (noteDevice.getDateNote() != null) {
+                                noteDeviceResponse.setAppointmentDate(dateFormat.format(noteDevice.getDateNote()));
+                            }
 
                             DeviceResponse deviceResponse = new DeviceResponse();
                             deviceResponse.setDeviceId(noteDevice.getDevice().getId());
@@ -183,7 +187,15 @@ public class ParseUtils {
                     }
                     reqResponse.setDeliveryNoteResponses(deliveryNotes);
                 }
+
+                if (request.getProject() != null) {
+                    ProjectResponse projectResponse = new ProjectResponse();
+                    projectResponse.setId(request.getProject().getId().toString());
+                    projectResponse.setName(request.getProject().getProjectName());
+                    reqResponse.setProject(projectResponse);
+                }
             }
+
 
             return reqResponse;
         } catch (Exception e) {
@@ -203,11 +215,34 @@ public class ParseUtils {
                 deliveryNoteResponse.setTimeCreated(timeFormat.format(deliveryNote.getCreatedAt()));
                 deliveryNoteResponse.setIsConfirm(deliveryNote.getIsConfirm());
                 deliveryNoteResponse.setCreatedBy(convertUserToUserResponse(deliveryNote.getCreatedBy()));
-                deliveryNoteResponse.setAssignee(convertUserToUserResponse(deliveryNote.getRequest().getCreatedBy()));
+                if (deliveryNote.getRequest() != null) {
+                    deliveryNoteResponse.setAssignee(convertUserToUserResponse(deliveryNote.getRequest().getCreatedBy()));
+                }
                 deliveryNoteResponse.setProvider(convertProviderToProviderResponse(deliveryNote.getProvider(), false));
             }
 
             return deliveryNoteResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static NotificationResponse convertNotificationToNotificationResponse(Notifications notifications) {
+        try {
+            NotificationResponse notificationResponse = new NotificationResponse();
+
+            if (notifications != null) {
+                notificationResponse.setId(notifications.getId());
+                notificationResponse.setTitle(notifications.getTitle());
+                notificationResponse.setContent(notifications.getContent());
+                notificationResponse.setRead(notifications.getRead());
+                notificationResponse.setPath(notifications.getPath());
+                if (notifications.getCreatedAt() != null) {
+                    notificationResponse.setCreatedAt(timeFormat.format(notifications.getCreatedAt()));
+                }
+                notificationResponse.setCreatedBy(convertUserToUserResponse(notifications.getCreatedBy()));
+            }
+            return notificationResponse;
         } catch (Exception e) {
             throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -240,6 +275,12 @@ public class ParseUtils {
                         userResponse.getDeviceResponseList().add(deviceResponse);
                     }
                 }
+                if (user.getUserProjects() != null) {
+                    for (UserProject project : user.getUserProjects()) {
+                        ProjectResponse projectResponse = convertProjectToProjectResponse(project);
+                        userResponse.getProjects().add(projectResponse);
+                    }
+                 }
             }
 
             return userResponse;
@@ -248,7 +289,23 @@ public class ParseUtils {
         }
     }
 
-    public static GroupResponse convertGroupToGroupResponse (Group group) {
+    public static ProjectResponse convertProjectToProjectResponse(UserProject userProject) {
+        try {
+            ProjectResponse projectResponse = new ProjectResponse();
+            if (userProject != null) {
+                projectResponse.setId(userProject.getProject().getId().toString());
+                projectResponse.setName(userProject.getProject().getProjectName());
+                if (userProject.getDateOfJoin() != null) {
+                    projectResponse.setDateJoin(dateFormat.format(userProject.getDateOfJoin()));
+                }
+            }
+            return projectResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static GroupResponse convertGroupToGroupResponse(Group group) {
         try {
             GroupResponse groupResponse = new GroupResponse();
 
@@ -264,7 +321,28 @@ public class ParseUtils {
         }
     }
 
-    public static GroupResponse convertGroupToGroupResponse (Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity) {
+    public static DepartmentResponse convertDepartmentToDepartmentResponse(Department department) {
+        try {
+            DepartmentResponse departmentResponse = new DepartmentResponse();
+
+            if (department != null) {
+                departmentResponse.setId(department.getId());
+                departmentResponse.setName(department.getName());
+                if (department.getUsers() != null) {
+                    for (User user : department.getUsers()) {
+                        UserResponse userResponse = convertUserToUserResponse(user);
+                        departmentResponse.getUsers().add(userResponse);
+                    }
+                }
+            }
+
+            return departmentResponse;
+        } catch (Exception e) {
+            throw new HandlerException(ErrorCodeEnum.ER005.getCode(), ErrorCodeEnum.ER005.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static GroupResponse convertGroupToGroupResponse(Group group, Integer activeQuantity, Integer stockQuantity, Integer maintenanceQuantity, Integer scraped) {
         try {
             GroupResponse groupResponse = new GroupResponse();
 
@@ -275,6 +353,7 @@ public class ParseUtils {
                 groupResponse.setUsedQuantity(activeQuantity);
                 groupResponse.setStockQuantity(stockQuantity);
                 groupResponse.setMaintenanceQuantity(maintenanceQuantity);
+                groupResponse.setScrapedQuantity(scraped);
             }
 
             return groupResponse;
@@ -283,7 +362,7 @@ public class ParseUtils {
         }
     }
 
-    public static ProviderResponse convertProviderToProviderResponse (Provider provider, Boolean isSelectList) {
+    public static ProviderResponse convertProviderToProviderResponse(Provider provider, Boolean isSelectList) {
         try {
             ProviderResponse providerResponse = new ProviderResponse();
             if (provider != null) {
@@ -308,6 +387,7 @@ public class ParseUtils {
     // parse string to date if field is date
     public static Object parseValue(String field, String value, SimpleDateFormat dateFormat) throws ParseException {
         if (field.toLowerCase().contains("date")) {
+            if (value == null || value.trim().isEmpty()) return null;
             return dateFormat.parse(value);
         }
         return value;

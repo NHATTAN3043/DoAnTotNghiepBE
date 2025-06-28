@@ -88,7 +88,7 @@ public class User {
     private Department department;
 
     // relationship of user projects
-    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = USER, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<UserProject> userProjects = new ArrayList<>();
 
     // relationship of device

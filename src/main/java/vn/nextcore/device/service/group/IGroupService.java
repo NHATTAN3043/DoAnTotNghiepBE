@@ -14,5 +14,5 @@ public interface IGroupService {
 
     void deleteGroupById(String id);
 
-    List<GroupResponse> getAllGroup();
+    List<GroupResponse> getAllGroup(Boolean isSelectList);
 }

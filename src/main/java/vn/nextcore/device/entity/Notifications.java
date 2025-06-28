@@ -18,7 +18,7 @@ public class Notifications {
     public static final String ID = "maThongBao";
     public static final String TITLE = "tieuDe";
     public static final String CONTENT = "noiDung";
-    public static final String STATUS = "trangThai";
+    public static final String READ = "daDoc";
     public static final String PATH = "duongDan";
     public static final String USER_ID = "maNguoiDung";
     public static final String CREATED_BY = "maNguoiTao";
@@ -37,8 +37,8 @@ public class Notifications {
     @Column(name = CONTENT, length = 500)
     private String content;
 
-    @Column(name = STATUS, length = 50)
-    private String status;
+    @Column(name = READ)
+    private Boolean read = false;
 
     @Column(name = PATH, length = 500)
     private String path;

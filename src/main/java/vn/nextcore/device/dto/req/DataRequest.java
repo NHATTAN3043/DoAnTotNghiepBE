@@ -17,6 +17,8 @@ public class DataRequest {
 
     private String requestType;
 
+    private String status;
+
     @NotBlank(message = "ER124")
     private List<ReqTypesRequest> requestGroups;
 }

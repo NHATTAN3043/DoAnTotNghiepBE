@@ -16,7 +16,13 @@ public class DeliveryNoteRequest {
 
     private Long providerId;
 
+    private String appointmentDate;
+
     private Boolean isConfirm;
+
+    private String priceSell;
+
+    private String dateSell;
 
     private List<NoteDeviceRequest> noteDeviceRequests;
 

@@ -87,10 +87,15 @@ public class Request {
     private Project project;
 
     // relationship of request_group
-    @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<RequestGroup> requestGroups = new HashSet<>();
 
     //relationship of delivery_notes
     @OneToMany(mappedBy = REQUEST, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DeliveryNote> deliveryNotes = new ArrayList<>();
+
+    // relationship of user request hidden
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserRequestVisibility> visibilities = new ArrayList<>();
+
 }

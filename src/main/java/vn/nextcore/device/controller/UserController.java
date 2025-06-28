@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import vn.nextcore.device.dto.req.ChangePasswordRequest;
 import vn.nextcore.device.dto.req.DepartmentRequest;
 import vn.nextcore.device.dto.req.UserRequest;
 import vn.nextcore.device.dto.resp.*;
@@ -37,6 +38,15 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public DataResponse<UserResponse> updateUser(
+            @PathVariable("id") String userId,
+            @Valid @ModelAttribute UserRequest userRequest) {
+        UserResponse result = userService.updateUser(userId, userRequest);
+        return new DataResponse<>(result);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(value = "/update-profile/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataResponse<UserResponse> updateProfile(
             @PathVariable("id") String userId,
             @Valid @ModelAttribute UserRequest userRequest) {
         UserResponse result = userService.updateUser(userId, userRequest);
@@ -83,6 +93,11 @@ public class UserController {
     public DataResponse<DepartmentResponse> createDepartment(@RequestBody DepartmentRequest departmentRequest) {
         DepartmentResponse result = userService.createDepartment(departmentRequest);
         return new DataResponse<>(result);
+    }
+
+    @PutMapping("/change-password")
+    public void changPassword(HttpServletRequest request, @RequestBody ChangePasswordRequest req) {
+        userService.changePassword(request, req);
     }
 
 }

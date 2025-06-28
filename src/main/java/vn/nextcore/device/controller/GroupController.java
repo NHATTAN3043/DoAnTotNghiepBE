@@ -64,8 +64,8 @@ public class GroupController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public DataResponse<List<GroupResponse>> groupList() {
-        List<GroupResponse> result = groupService.getAllGroup();
+    public DataResponse<List<GroupResponse>> groupList(@RequestParam(required = false, defaultValue = "true") Boolean isSelectList) {
+        List<GroupResponse> result = groupService.getAllGroup(isSelectList);
         return new DataResponse<>(result);
     }
 
@@ -76,10 +76,11 @@ public class GroupController {
     })
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public GroupResponse getOneGroup(
+    public DataResponse<GroupResponse> getOneGroup(
             @Parameter(description = "Id of group is number", required = true, example = "1")
             @PathVariable(name = "id") String groupId) {
-        return groupService.findOneGroup(groupId);
+        GroupResponse result = groupService.findOneGroup(groupId);
+        return new DataResponse<>(result);
     }
 
     @Operation(summary = "Delete Group")

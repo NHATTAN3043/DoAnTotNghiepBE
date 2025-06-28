@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import vn.nextcore.device.service.storageFiles.StorageService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 
@@ -22,12 +20,18 @@ import java.io.IOException;
 @EnableScheduling
 public class BaNextDeviceApplication {
     @Bean
-    FirebaseMessaging firebaseMessaging(@Value("classpath:${firebase.config-file}") Resource resource) throws IOException {
-        GoogleCredentials googleCredentials = GoogleCredentials.fromStream(resource.getInputStream());
+    FirebaseMessaging firebaseMessaging() throws IOException {
+        GoogleCredentials googleCredentials = GoogleCredentials.
+                fromStream(new ClassPathResource("nextdevice-2efec-firebase-adminsdk-fbsvc-81fab3a875.json").getInputStream());
         FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                 .setCredentials(googleCredentials).build();
-        FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions);
-        return FirebaseMessaging.getInstance(app);
+        FirebaseApp firebaseApp;
+        if (FirebaseApp.getApps().isEmpty()) {
+            firebaseApp = FirebaseApp.initializeApp(firebaseOptions);
+        } else {
+            firebaseApp = FirebaseApp.getInstance();
+        }
+        return FirebaseMessaging.getInstance(firebaseApp);
 
     }
 
