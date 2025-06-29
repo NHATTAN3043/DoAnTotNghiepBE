@@ -63,7 +63,7 @@ public class NotificationService implements INotificationService {
         for (String token : tokens) {
             Message message = Message.builder()
                     .setToken(token)
-//                    .setNotification(notification)
+                    .setNotification(notification)
                     .putAllData(data)
                     .build();
             try {
